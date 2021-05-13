@@ -1,0 +1,1 @@
+export const EDITING_PROGRESS = 'EDITING_PROGRESS';
