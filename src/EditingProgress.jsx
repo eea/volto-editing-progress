@@ -1,42 +1,110 @@
 import PropTypes from 'prop-types';
-import React, { useEffect } from 'react';
-import { Portal } from 'react-portal';
-import { useDispatch } from 'react-redux';
+import React, { useEffect, useRef } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { Button } from 'semantic-ui-react';
 import { getEditingProgress } from './actions';
 import './less/editor.less';
 import { Plug } from '@plone/volto/components/manage/Pluggable';
+import { getBaseUrl } from '@plone/volto/helpers';
+
+const filter_remaining_steps = (values, key) => {
+  return values.filter((value) => {
+    const is_not_ready = !value.is_ready;
+    if (!is_not_ready) {
+      return false;
+    }
+    const states = value.states;
+    const required_for_all = states.indexOf('all') !== -1;
+    return (
+      (is_not_ready && required_for_all) ||
+      (is_not_ready && states.indexOf(key) !== -1)
+    );
+  });
+};
 
 /**
  * @summary The React component that shows editing progress of required fields per active workflow state of selected content.
  */
 const EditingProgress = (props) => {
-  const { content, pathname } = props;
-  const contentId = content?.['@id'] || '';
+  const { content, pathname, token } = props;
   const dispatch = useDispatch();
-  const isToolbarOpen = true;
+  const isAuth = !!token;
+  const contentId = content?.['@id'] || '';
+
+  const sideMenuRef = useRef(null);
+
+  const basePathname = getBaseUrl(pathname);
+  const samePathname =
+    contentId && basePathname && contentId.endsWith(basePathname);
+  const fetchCondition = pathname.endsWith('/contents')
+    ? pathname === basePathname + '/contents'
+    : pathname === basePathname;
+
+  const currentStateKey = content?.review_state;
+  const editingProgressSteps = useSelector((state) => {
+    if (isAuth && state?.editingProgress?.editing?.loaded === true) {
+      return state?.editingProgress?.result?.steps;
+    }
+    return null;
+  });
+
+  const toggleEditingSidebar = () => {
+    sideMenuRef.current && sideMenuRef.current.classList.toggle('is-hidden');
+  };
 
   useEffect(() => {
-    dispatch(getEditingProgress(contentId)); // the are paths that don't have workflow (home, login etc)
-  }, [dispatch, pathname, contentId]);
+    if (isAuth && fetchCondition && samePathname) {
+      dispatch(getEditingProgress(basePathname));
+    }
+  }, [dispatch, isAuth, basePathname, fetchCondition, samePathname]);
 
-  return (
-    isToolbarOpen && (
-      <Portal
-        node={__CLIENT__ && document.querySelector('#toolbar .toolbar-actions')}
+  return isAuth &&
+    samePathname &&
+    editingProgressSteps &&
+    editingProgressSteps.length ? (
+    <>
+      <Plug
+        pluggable="active-workflow-progress"
+        id="style"
+        key={editingProgressSteps}
       >
-        <Plug pluggable="active-workflow-progress" id="style">
-          {(options) => {
-            return <Button>{options.id}</Button>;
-          }}
-        </Plug>
-      </Portal>
-    )
-  );
+        {() => {
+          const remaining_steps = filter_remaining_steps(
+            editingProgressSteps,
+            currentStateKey,
+          );
+
+          return (
+            <div className={'ep-sidenav-wrapper'}>
+              <Button
+                className={'ep-sidenav-btn'}
+                onClick={toggleEditingSidebar}
+              >
+                {remaining_steps.length} fields missing
+              </Button>
+              <ul
+                className={'sidenav-ol ep-sidenav is-hidden'}
+                ref={sideMenuRef}
+              >
+                {remaining_steps.map((step, index) => {
+                  return (
+                    <li className={'ep-sidenav-li'} key={step['link_label']}>
+                      <a href={step['link']} className={'ep-sidenav-a'}>
+                        {step['link_label']}
+                      </a>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          );
+        }}
+      </Plug>
+    </>
+  ) : null;
 };
 
 EditingProgress.propTypes = {
-  pathname: PropTypes.string.isRequired,
   content: PropTypes.object,
 };
 
