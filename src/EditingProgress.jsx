@@ -5,7 +5,7 @@ import { Button } from 'semantic-ui-react';
 import { getEditingProgress } from './actions';
 import './less/editor.less';
 import { Plug } from '@plone/volto/components/manage/Pluggable';
-import { getBaseUrl } from '@plone/volto/helpers';
+import { getBaseUrl, flattenToAppURL } from '@plone/volto/helpers';
 
 const filter_remaining_steps = (values, key) => {
   return values.filter((value) => {
@@ -34,13 +34,14 @@ const EditingProgress = (props) => {
   const sideMenuRef = useRef(null);
 
   const basePathname = getBaseUrl(pathname);
-  const samePathname =
+  const contentContainsPathname =
     contentId && basePathname && contentId.endsWith(basePathname);
-  const fetchCondition = pathname.endsWith('/contents')
-    ? pathname === basePathname + '/contents'
-    : pathname === basePathname;
+  const isEdit = pathname.endsWith('/edit');
+  const fetchCondition =
+    pathname.endsWith('/contents') || isEdit || pathname === basePathname;
 
   const currentStateKey = content?.review_state;
+
   const editingProgressSteps = useSelector((state) => {
     if (isAuth && state?.editingProgress?.editing?.loaded === true) {
       return state?.editingProgress?.result?.steps;
@@ -52,14 +53,20 @@ const EditingProgress = (props) => {
     sideMenuRef.current && sideMenuRef.current.classList.toggle('is-hidden');
   };
 
+  function markStepAsSoftRequired(step) {
+    const url = step['link'];
+    const label = url && document.getElementById(url.split('#')[1]);
+    label && label.closest('.field').classList.add('soft-required');
+  }
+
   useEffect(() => {
-    if (isAuth && fetchCondition && samePathname) {
+    if (isAuth && fetchCondition && contentContainsPathname) {
       dispatch(getEditingProgress(basePathname));
     }
-  }, [dispatch, isAuth, basePathname, fetchCondition, samePathname]);
+  }, [dispatch, isAuth, basePathname, fetchCondition, contentContainsPathname]);
 
   return isAuth &&
-    samePathname &&
+    contentContainsPathname &&
     editingProgressSteps &&
     editingProgressSteps.length ? (
     <>
@@ -87,9 +94,15 @@ const EditingProgress = (props) => {
                 ref={sideMenuRef}
               >
                 {remaining_steps.map((step, index) => {
+                  if (isEdit) {
+                    markStepAsSoftRequired(step);
+                  }
                   return (
                     <li className={'ep-sidenav-li'} key={step['link_label']}>
-                      <a href={step['link']} className={'ep-sidenav-a'}>
+                      <a
+                        href={flattenToAppURL(step['link'])}
+                        className={'ep-sidenav-a'}
+                      >
                         {step['link_label']}
                       </a>
                     </li>
