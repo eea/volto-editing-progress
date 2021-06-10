@@ -1,0 +1,21 @@
+@orange: orange;
+
+.ep-sidenav {
+  left: 280px;
+  padding: 1.5rem;
+}
+
+.soft-required .wrapper {
+  > label[for]::after,
+  .ui.label::after {
+    position: absolute;
+    top: 28%;
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    margin-left: 5px;
+    background-color: @orange;
+    border-radius: 50%;
+    content: '';
+  }
+}
