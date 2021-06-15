@@ -1,4 +1,5 @@
 import EditingProgress from './EditingProgress';
+import ScrollIntoView from './ScrollIntoView';
 import { editingProgress } from './reducers';
 
 const applyConfig = (config) => {
@@ -14,6 +15,10 @@ const applyConfig = (config) => {
     {
       match: '',
       component: EditingProgress,
+    },
+    {
+      match: '',
+      component: ScrollIntoView,
     },
   ];
 

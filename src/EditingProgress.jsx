@@ -53,12 +53,6 @@ const EditingProgress = (props) => {
     sideMenuRef.current && sideMenuRef.current.classList.toggle('is-hidden');
   };
 
-  function markStepAsSoftRequired(step) {
-    const url = step['link'];
-    const label = url && document.getElementById(url.split('#')[1]);
-    label && label.closest('.field').classList.add('soft-required');
-  }
-
   useEffect(() => {
     if (isAuth && fetchCondition && contentContainsPathname) {
       dispatch(getEditingProgress(basePathname));
@@ -94,9 +88,6 @@ const EditingProgress = (props) => {
                 ref={sideMenuRef}
               >
                 {remaining_steps.map((step, index) => {
-                  if (isEdit) {
-                    markStepAsSoftRequired(step);
-                  }
                   return (
                     <li className={'ep-sidenav-li'} key={step['link_label']}>
                       <a
