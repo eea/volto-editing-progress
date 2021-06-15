@@ -1,9 +1,12 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 
 const ScrollIntoView = (props) => {
   const { location } = props;
 
   useEffect(() => {
+    if (!__CLIENT__) {
+      return;
+    }
     let count = 0;
     if (location.hash) {
       function scrollIdIntoView() {
@@ -23,7 +26,7 @@ const ScrollIntoView = (props) => {
       }
       const id = window.setInterval(scrollIdIntoView, 250);
     }
-  }, [location?.hash, __CLIENT__]);
+  }, [location.hash]);
 
   return null;
 };
