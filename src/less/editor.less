@@ -19,3 +19,18 @@
     content: '';
   }
 }
+/* Flash class and keyframe animation */
+.flash-effect {
+  -webkit-animation: flash linear 1s 1s 1.5;
+  animation: flash linear 1s 1s 1.5;
+}
+@-webkit-keyframes flash {
+  0% { opacity: 1; }
+  50% { opacity: .1; }
+  100% { opacity: 1; }
+}
+@keyframes flash {
+  0% { opacity: 1; }
+  50% { opacity: .1; }
+  100% { opacity: 1; }
+}
