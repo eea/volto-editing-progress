@@ -17,7 +17,10 @@ const ScrollIntoView = (props) => {
         if (obj) {
           const parent = obj.closest('.field') || obj;
           parent.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          parent.classList.add('flash-effect');
+          if (parent.classList.contains('flash-effect')) {
+            parent.classList.remove('flash-effect');
+          }
+          window.setTimeout(() => parent.classList.add('flash-effect'), 10);
           window.clearInterval(id);
         }
         if (count > 40) {
