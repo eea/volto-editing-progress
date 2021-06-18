@@ -15,7 +15,7 @@ const ScrollIntoView = (props) => {
           window.decodeURIComponent(location.hash.split('#')[1]),
         );
         if (obj) {
-          const parent = obj.closest('.field');
+          const parent = obj.closest('.field') || obj;
           parent.scrollIntoView({ behavior: 'smooth', block: 'center' });
           parent.classList.add('flash-effect');
           window.clearInterval(id);
