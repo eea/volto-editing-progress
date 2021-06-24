@@ -41,7 +41,7 @@ const ScrollIntoView = (props) => {
       }
       const id = window.setInterval(scrollIdIntoView, 250);
     }
-  }, [location.hash]);
+  }, [location.hash, location.pathname]);
 
   return null;
 };
