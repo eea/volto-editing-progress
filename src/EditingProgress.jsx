@@ -14,10 +14,10 @@ const filter_remaining_steps = (values, key) => {
       return false;
     }
     const states = value.states;
-    const required_for_all = states.indexOf('all') !== -1;
+    const required_for_all = states?.indexOf('all') !== -1;
     return (
       (is_not_ready && required_for_all) ||
-      (is_not_ready && states.indexOf(key) !== -1)
+      (is_not_ready && states?.indexOf(key) !== -1)
     );
   });
 };
