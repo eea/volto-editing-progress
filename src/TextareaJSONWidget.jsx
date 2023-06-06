@@ -1,6 +1,6 @@
 /**
- * TextareaJSONWidget component.
- * @module components/manage/Widgets/TextareaJSONWidget
+ * TextAreaJSONWidget component.
+ * @module components/manage/Widgets/TextAreaJSONWidget
  */
 
 import React, { useState } from 'react';
@@ -10,7 +10,7 @@ import { Label, TextArea } from 'semantic-ui-react';
 import { injectIntl } from 'react-intl';
 import { FormFieldWrapper } from '@plone/volto/components';
 
-const TextareaJSONWidget = (props) => {
+const TextAreaJSONWidget = (props) => {
   const { id, maxLength, value, onChange, placeholder, isDisabled } = props;
   const [lengthError, setlengthError] = useState('');
 
@@ -54,7 +54,7 @@ const TextareaJSONWidget = (props) => {
  * @property {Object} propTypes Property types.
  * @static
  */
-TextareaJSONWidget.propTypes = {
+TextAreaJSONWidget.propTypes = {
   id: PropTypes.string.isRequired,
   title: PropTypes.string.isRequired,
   description: PropTypes.string,
@@ -74,7 +74,7 @@ TextareaJSONWidget.propTypes = {
  * @property {Object} defaultProps Default properties.
  * @static
  */
-TextareaJSONWidget.defaultProps = {
+TextAreaJSONWidget.defaultProps = {
   description: null,
   maxLength: null,
   required: false,
@@ -85,4 +85,4 @@ TextareaJSONWidget.defaultProps = {
   onDelete: null,
 };
 
-export default injectIntl(TextareaJSONWidget);
+export default injectIntl(TextAreaJSONWidget);
