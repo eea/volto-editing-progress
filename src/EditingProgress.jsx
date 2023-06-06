@@ -84,7 +84,7 @@ const EditingProgress = (props) => {
                 {remaining_steps.length} fields missing
               </Button>
               <ul
-                className={'sidenav-ol ep-sidenav is-hidden'}
+                className={'sidenav-ol sidenav-ol--ep is-hidden'}
                 ref={sideMenuRef}
               >
                 {remaining_steps.map((step, index) => {
