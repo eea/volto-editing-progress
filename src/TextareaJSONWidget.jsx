@@ -35,7 +35,7 @@ const TextareaJSONWidget = (props) => {
         disabled={isDisabled}
         placeholder={placeholder}
         rows="10"
-        style={{height: "400px", maxWidth: "none"}}
+        style={{ height: '400px', maxWidth: 'none' }}
         onChange={({ target }) =>
           onhandleChange(id, target.value === '' ? undefined : target.value)
         }
