@@ -23,7 +23,7 @@ const TextAreaJSONWidget = (props) => {
         setlengthError('');
       }
     }
-    onChange(id, value);
+    onChange(id, JSON.parse(value));
   };
 
   return (
