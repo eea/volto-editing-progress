@@ -41,6 +41,9 @@ const TextAreaJSONWidget = (props) => {
   const onhandleChange = (id, value) => {
     if (!isValidJson(value)) {
       setInvalidJSONError([intl.formatMessage(messages.invalidJSONError)]);
+      // remove error message after 2 seconds, since serves an informative role:
+      // in case of invalidation attempt the last valid JSON is shown
+      setTimeout(() => setInvalidJSONError([]), 1500)
       onChange(id, prevValue);
     } else {
       setPrevValue(JSON.parse(value));
@@ -78,7 +81,7 @@ TextAreaJSONWidget.propTypes = {
   description: PropTypes.string,
   required: PropTypes.bool,
   error: PropTypes.arrayOf(PropTypes.string),
-  value: PropTypes.string,
+  value: PropTypes.object,
   onChange: PropTypes.func,
   onEdit: PropTypes.func,
   onDelete: PropTypes.func,
