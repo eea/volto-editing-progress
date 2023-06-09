@@ -14,10 +14,10 @@ const filter_remaining_steps = (values, key) => {
       return false;
     }
     const states = value.states;
-    const required_for_all = states.indexOf('all') !== -1;
+    const required_for_all = states?.indexOf('all') !== -1;
     return (
       (is_not_ready && required_for_all) ||
-      (is_not_ready && states.indexOf(key) !== -1)
+      (is_not_ready && states?.indexOf(key) !== -1)
     );
   });
 };
@@ -84,7 +84,7 @@ const EditingProgress = (props) => {
                 {remaining_steps.length} fields missing
               </Button>
               <ul
-                className={'sidenav-ol ep-sidenav is-hidden'}
+                className={'sidenav-ol sidenav-ol--ep is-hidden'}
                 ref={sideMenuRef}
               >
                 {remaining_steps.map((step, index) => {

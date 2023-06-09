@@ -1,6 +1,7 @@
 import EditingProgress from './EditingProgress';
 import ScrollIntoView from './ScrollIntoView';
 import { editingProgress } from './reducers';
+import TextareaJSONWidget from './TextareaJSONWidget';
 
 const applyConfig = (config) => {
   config.addonReducers = {
@@ -9,6 +10,8 @@ const applyConfig = (config) => {
   };
 
   const appExtras = config.settings.appExtras || [];
+
+  config.widgets.id.progress = TextareaJSONWidget;
 
   config.settings.appExtras = [
     ...appExtras,
