@@ -43,7 +43,7 @@ const TextAreaJSONWidget = (props) => {
       setInvalidJSONError([intl.formatMessage(messages.invalidJSONError)]);
       // remove error message after 1.5 seconds, since serves an informative role:
       // in case of invalidation attempt the last valid JSON is shown
-      setTimeout(() => setInvalidJSONError([]), 1500)
+      setTimeout(() => setInvalidJSONError([]), 1500);
       onChange(id, prevValue);
     } else {
       setPrevValue(JSON.parse(value));
