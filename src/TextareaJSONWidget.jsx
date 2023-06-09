@@ -5,33 +5,56 @@
 
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { Label, TextArea } from 'semantic-ui-react';
+import { TextArea } from 'semantic-ui-react';
 
-import { injectIntl } from 'react-intl';
+import { defineMessages, injectIntl } from 'react-intl';
 import { FormFieldWrapper } from '@plone/volto/components';
 
-const TextAreaJSONWidget = (props) => {
-  const { id, maxLength, value, onChange, placeholder, isDisabled } = props;
-  const [lengthError, setlengthError] = useState('');
+const messages = defineMessages({
+  invalidJSONError: {
+    id: 'Please enter valid JSON!',
+    defaultMessage: 'Please enter valid JSON!',
+  },
+});
 
+function isValidJson(json) {
+  try {
+    JSON.parse(json);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+const TextAreaJSONWidget = (props) => {
+  const { id, value = '', onChange, placeholder, isDisabled, intl } = props;
+  const [invalidJSONError, setInvalidJSONError] = useState([]);
+  const [prevValue, setPrevValue] = useState(value);
+
+  /**
+   * will update Textarea to current value only if JSON is valid
+   * otherwise it will keep the previous value to avoid invalid JSON errors
+   * value is stringified, prevValue is object
+   * @param {string} id
+   * @param {string} value
+   */
   const onhandleChange = (id, value) => {
-    if (maxLength & value?.length) {
-      let remlength = maxLength - value.length;
-      if (remlength < 0) {
-        setlengthError(`You have exceed word limit by ${Math.abs(remlength)}`);
-      } else {
-        setlengthError('');
-      }
+    if (!isValidJson(value)) {
+      setInvalidJSONError([intl.formatMessage(messages.invalidJSONError)]);
+      onChange(id, prevValue);
+    } else {
+      setPrevValue(JSON.parse(value));
+      setInvalidJSONError([]);
+      onChange(id, JSON.parse(value));
     }
-    onChange(id, JSON.parse(value));
   };
 
   return (
-    <FormFieldWrapper {...props} className="textarea">
+    <FormFieldWrapper {...props} className="textarea" error={invalidJSONError}>
       <TextArea
         id={`field-${id}`}
         name={id}
-        value={value ? JSON.stringify(value, undefined, 2) : ''}
+        value={prevValue ? JSON.stringify(prevValue, undefined, 2) : ''}
         disabled={isDisabled}
         placeholder={placeholder}
         rows="10"
@@ -40,11 +63,6 @@ const TextAreaJSONWidget = (props) => {
           onhandleChange(id, target.value === '' ? undefined : target.value)
         }
       />
-      {lengthError.length > 0 && (
-        <Label key={lengthError} basic color="red" pointing>
-          {lengthError}
-        </Label>
-      )}
     </FormFieldWrapper>
   );
 };
@@ -58,7 +76,6 @@ TextAreaJSONWidget.propTypes = {
   id: PropTypes.string.isRequired,
   title: PropTypes.string.isRequired,
   description: PropTypes.string,
-  maxLength: PropTypes.number,
   required: PropTypes.bool,
   error: PropTypes.arrayOf(PropTypes.string),
   value: PropTypes.string,
@@ -76,7 +93,6 @@ TextAreaJSONWidget.propTypes = {
  */
 TextAreaJSONWidget.defaultProps = {
   description: null,
-  maxLength: null,
   required: false,
   error: [],
   value: null,
