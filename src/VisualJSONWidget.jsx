@@ -6,12 +6,12 @@ import _ from 'lodash';
 import { FormattedMessage, defineMessages } from 'react-intl';
 const messages = defineMessages({
   addcontentType: {
-    id: 'Add contentType',
-    defaultMessage: 'Add contentType',
+    id: 'Add Content Type',
+    defaultMessage: 'Add Content Type',
   },
   editcontentType: {
-    id: 'Edit contentType',
-    defaultMessage: 'Edit contentType',
+    id: 'Edit Content Type',
+    defaultMessage: 'Edit Content Type',
   },
   jsonTitle: {
     id: 'Edit JSON',
@@ -40,37 +40,49 @@ const VisualJSONWidget = (props) => {
     //Deleting the Content Type from the "value" so that the Content Type title can be changed
     const duplicateValue = { ...value };
     delete duplicateValue[modalData.contentType];
-    e.state = e.state.map((i) => {
-      //Delete the @id key that formModal volto component automatically adds to keep the json clean
-      delete i?.['@id'];
-      //The tag "states" needs to be an array, so we split the string on ","
-      if (!Array.isArray(i.states)) {
-        i.states = i.states?.split(',');
-      }
-      return i;
-    });
+    e.state = Array.isArray(e?.state)
+      ? e?.state.map((i) => {
+          //Delete the @id key that formModal volto component automatically adds to keep the json clean
+          delete i?.['@id'];
+          //The tag "states" needs to be an array, so we split the string on ","
+          if (!Array.isArray(i.states) && typeof i.states == 'string') {
+            i.states = i.states?.split(',');
+          }
+          return i;
+        })
+      : [];
     const localData = { [e.contentType]: e.state };
     onChange(id, { ...duplicateValue, ...localData });
     setIsVisualModalOpen(false);
   };
 
-  const handleEditcontentType = (e, name) => {
+  const handleEditContentType = (e, name) => {
     e.preventDefault();
+
     // Add @id key with a unique id to every state. It is required by the formModal volto component.
-    const dataForModal = value[name].map((state) => {
-      return { ...state, ...{ '@id': _.uniqueId('modal_') } };
-    });
+    const dataForModal = Array.isArray(value[name])
+      ? value[name].map((state) => {
+          return {
+            ...state,
+            ...{ '@id': _.uniqueId('modal_') },
+            states:
+              Array.isArray(state?.states) &&
+              state?.states?.length > 0 &&
+              state.states.join(','),
+          };
+        })
+      : [];
     setModalData({ contentType: name, state: dataForModal });
     setIsVisualModalOpen(true);
     setModalTitle(props.intl.formatMessage(messages.editcontentType));
   };
-  const handleAddcontentType = (e) => {
+  const handleAddContentType = (e) => {
     e.preventDefault();
     setIsVisualModalOpen(true);
     setModalData({});
     setModalTitle(props.intl.formatMessage(messages.addcontentType));
   };
-  const handleDeletecontentType = (e, name) => {
+  const handleDeleteContentType = (e, name) => {
     e.preventDefault();
     delete value[name];
     onChange(id, value);
@@ -117,7 +129,7 @@ const VisualJSONWidget = (props) => {
           />
         )}
         <Container>
-          <Button onClick={handleAddcontentType}>
+          <Button onClick={handleAddContentType}>
             <FormattedMessage
               id="Add Content Type"
               defaultMessage="Add Content Type"
@@ -132,14 +144,14 @@ const VisualJSONWidget = (props) => {
           {Object.keys(value).map((entry) => (
             <Segment key={_.uniqueId('key_')}>
               <Header as="h2">{entry}</Header>
-              <Button onClick={(e) => handleEditcontentType(e, entry)} primary>
+              <Button onClick={(e) => handleEditContentType(e, entry)} primary>
                 <FormattedMessage
                   id="Edit Content Type"
                   defaultMessage="Edit Content Type"
                 />
               </Button>
               <Button
-                onClick={(e) => handleDeletecontentType(e, entry)}
+                onClick={(e) => handleDeleteContentType(e, entry)}
                 secondary
               >
                 <FormattedMessage

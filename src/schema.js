@@ -1,7 +1,8 @@
 import { defineMessages } from 'react-intl';
-export const schemaModal = ({ intl }) => {
+import TextareaJSONWidget from './TextareaJSONWidget';
+export const schemaModal = (props) => {
   return {
-    title: intl.formatMessage(messages.fieldConditions),
+    title: props.intl.formatMessage(messages.fieldConditions),
     required: [],
     fieldsets: [
       {
@@ -23,43 +24,68 @@ export const schemaModal = ({ intl }) => {
     ],
     properties: {
       condition: {
-        title: intl.formatMessage(messages.condition),
-        widget: 'text',
+        title: props.intl.formatMessage(messages.condition),
+        widget: 'customText',
+        widgetProps: {
+          value: 'python:value',
+        },
       },
       hideReady: {
-        title: intl.formatMessage(messages.hideReady),
-        widget: 'text',
+        title: props.intl.formatMessage(messages.hideReady),
+        widget: 'customText',
+        widgetProps: {
+          value: 'False',
+        },
       },
       iconEmpty: {
-        title: intl.formatMessage(messages.iconEmpty),
-        widget: 'text',
+        title: props.intl.formatMessage(messages.iconEmpty),
+        widget: 'customText',
+        widgetProps: {
+          value: 'eea-icon eea-icon-edit',
+        },
       },
       iconReady: {
-        title: intl.formatMessage(messages.iconReady),
-        widget: 'text',
+        title: props.intl.formatMessage(messages.iconReady),
+        widget: 'customText',
+        widgetProps: {
+          value: 'eea-icon eea-icon-check',
+        },
       },
       labelEmpty: {
-        title: intl.formatMessage(messages.labelEmpty),
-        widget: 'text',
+        title: props.intl.formatMessage(messages.labelEmpty),
+        widget: 'customText',
+        widgetProps: {
+          value: 'Please set the {label} of this {context.portal_type}',
+        },
       },
       labelReady: {
-        title: intl.formatMessage(messages.labelReady),
-        widget: 'text',
+        title: props.intl.formatMessage(messages.labelReady),
+        widget: 'customText',
+        widgetProps: {
+          value: 'You added the {label}',
+        },
       },
       link: {
-        title: intl.formatMessage(messages.link),
-        widget: 'text',
+        title: props.intl.formatMessage(messages.link),
+        widget: 'customText',
+        widgetProps: {
+          value:
+            'edit#fieldset-supporting information-field-label-data_description',
+        },
       },
       linkLabel: {
-        title: intl.formatMessage(messages.linkLabel),
-        widget: 'text',
+        title: props.intl.formatMessage(messages.linkLabel),
+        widget: 'customText',
+        widgetProps: {
+          value: 'Add {label}',
+        },
       },
       prefix: {
-        title: intl.formatMessage(messages.prefix),
+        title: props.intl.formatMessage(messages.prefix),
         widget: 'text',
       },
       states: {
-        title: intl.formatMessage(messages.states),
+        title: props.intl.formatMessage(messages.states),
         widget: 'text',
       },
     },
@@ -106,7 +132,8 @@ export const JSONSchema = (props) => {
     properties: {
       json: {
         title: props.intl.formatMessage(messages.json),
-        widget: 'textarea',
+        widget: 'jsonTextarea',
+        widgetProps: { ...props },
       },
     },
   };
