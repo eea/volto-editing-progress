@@ -82,17 +82,28 @@ class CustomTextWidget extends Component {
    * @method componentDidMount
    * @returns {undefined}
    */
-
+  state = {};
   componentDidMount() {
     if (this.props.focus) {
       this.node.focus();
-      this.props.onChange(
-        this.props.id,
-        this.props.placeholder || this.props.widgetProps.placeholder,
-      );
     }
   }
+  //Component did mount doesn't work, only the last input gets updated
+  //Using getDerivedStateFromProps all inputs get updated until all of them are populated
+  static getDerivedStateFromProps(props, state) {
+    if (props.value == null)
+      props.onChange(
+        props.id,
+        props.value != null
+          ? props.value
+          : props.widgetProps.value != null
+          ? props.widgetProps.value
+          : '',
+      );
 
+    // Return null to indicate no change to state.
+    return null;
+  }
   /**
    * Render method.
    * @method render
@@ -111,17 +122,16 @@ class CustomTextWidget extends Component {
       isDisabled,
       value,
       placeholder,
-      widgetProps,
     } = this.props;
     return (
       <FormFieldWrapper {...this.props} className="text">
         <Input
           id={`field-${id}`}
           name={id}
-          value={value || widgetProps.value || ''}
+          value={value || ''}
           disabled={isDisabled}
           icon={icon || null}
-          placeholder={placeholder || widgetProps.placeholder || ''}
+          placeholder={placeholder || ''}
           onChange={({ target }) =>
             onChange(id, target.value === '' ? undefined : target.value)
           }

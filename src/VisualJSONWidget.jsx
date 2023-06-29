@@ -35,12 +35,11 @@ const VisualJSONWidget = (props) => {
   const [modalTitle, setModalTitle] = useState(
     props.intl.formatMessage(messages.addcontentType),
   );
-
   const onSubmit = (e) => {
     //Deleting the Content Type from the "value" so that the Content Type title can be changed
     const duplicateValue = { ...value };
     delete duplicateValue[modalData.contentType];
-    e.state = Array.isArray(e?.state)
+    e.state = Array.isArray(e?.state) //Array.isArray is needed in case it's null
       ? e?.state.map((i) => {
           //Delete the @id key that formModal volto component automatically adds to keep the json clean
           delete i?.['@id'];
@@ -60,11 +59,12 @@ const VisualJSONWidget = (props) => {
     e.preventDefault();
 
     // Add @id key with a unique id to every state. It is required by the formModal volto component.
-    const dataForModal = Array.isArray(value[name])
+    const dataForModal = Array.isArray(value[name]) //Array.isArray is needed in case it's null
       ? value[name].map((state) => {
           return {
             ...state,
             ...{ '@id': _.uniqueId('modal_') },
+            //Transforming the array to string for it to be displayed
             states:
               Array.isArray(state?.states) &&
               state?.states?.length > 0 &&
