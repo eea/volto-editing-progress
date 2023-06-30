@@ -16,6 +16,12 @@
     "type": "git",
     "url": "git@github.com:eea/volto-editing-progress.git"
   },
+  "addons": [
+    "@eeacms/volto-workflow-progress"
+  ],
+  "dependencies": {
+    "@eeacms/volto-workflow-progress": "*"
+  },
   "devDependencies": {
     "@cypress/code-coverage": "^3.9.5",
     "babel-plugin-transform-class-properties": "^6.24.1",
