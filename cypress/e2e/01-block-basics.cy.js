@@ -44,8 +44,10 @@ describe('Blocks Tests', () => {
     cy.get('#field-progress')
       .dblclick()
       .invoke('val', documentStep)
-      .trigger('change')
-      .click();
+      .click()
+      .type('{enter}');
+
+    cy.get('#toolbar-save').click();
 
     cy.navigate('/cypress/my-page');
 
@@ -65,8 +67,9 @@ describe('Blocks Tests', () => {
       .type('test_progress');
     cy.get('#field-factory').click().type('text');
     cy.get('.react-select__menu ').contains('Text').click({ force: true });
-    cy.get('.ui.toggle.checkbox input').click({ force: true });
+    // cy.get('.ui.toggle.checkbox input').click({ force: true });
 
+    cy.get('.inline.field.field-wrapper-required input').click({ force: true });
     cy.get('.actions button[title="Save"]').click();
     cy.get('#toolbar-save').click();
 
