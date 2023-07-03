@@ -1,1 +1,2 @@
 export const EDITING_PROGRESS = 'EDITING_PROGRESS';
+export const GET_RAW_CONTENT = 'GET_RAW_CONTENT';

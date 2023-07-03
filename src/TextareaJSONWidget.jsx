@@ -26,16 +26,10 @@ function isValidJson(json) {
   }
 }
 
-const TextAreaJSONWidget = ({ widgetProps }) => {
-  const {
-    id,
-    value = '',
-    onChange,
-    placeholder,
-    isDisabled,
-    intl,
-  } = widgetProps;
-  console.log(widgetProps);
+const TextAreaJSONWidget = (props) => {
+  const { id, onChange, placeholder, isDisabled, intl } = props;
+  const value =
+    typeof props.value === 'string' ? JSON.parse(props.value) : props.value;
   const [invalidJSONError, setInvalidJSONError] = useState([]);
   const [prevValue, setPrevValue] = useState(value);
 
@@ -61,11 +55,7 @@ const TextAreaJSONWidget = ({ widgetProps }) => {
   };
 
   return (
-    <FormFieldWrapper
-      {...widgetProps}
-      className="textarea"
-      error={invalidJSONError}
-    >
+    <FormFieldWrapper {...props} className="textarea" error={invalidJSONError}>
       <TextArea
         id={`field-${id}`}
         name={id}

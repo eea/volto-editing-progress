@@ -1,6 +1,6 @@
 import EditingProgress from './EditingProgress';
 import ScrollIntoView from './ScrollIntoView';
-import { editingProgress } from './reducers';
+import { editingProgress, rawdata } from './reducers';
 import TextareaJSONWidget from './TextareaJSONWidget';
 import VisualJSONWidget from './VisualJSONWidget';
 import CustomTextWidget from './newTextWidget';
@@ -8,6 +8,7 @@ const applyConfig = (config) => {
   config.addonReducers = {
     ...config.addonReducers,
     editingProgress,
+    rawdata,
   };
 
   const appExtras = config.settings.appExtras || [];
