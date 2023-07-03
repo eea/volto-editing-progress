@@ -55,6 +55,13 @@ describe('Blocks Tests', () => {
     cy.contains('Site Setup').click();
 
     cy.contains('Editing Progress').click();
+
+    cy.get('#field-progress')
+      .dblclick()
+      .invoke('val', `test:test`)
+      .click()
+      .type('{enter}');
+
     cy.get('#field-progress')
       .dblclick()
       .invoke('val', documentStep)
