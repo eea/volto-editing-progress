@@ -3,7 +3,6 @@ import ScrollIntoView from './ScrollIntoView';
 import { editingProgress, rawdata } from './reducers';
 import TextareaJSONWidget from './TextareaJSONWidget';
 import VisualJSONWidget from './VisualJSONWidget';
-import CustomTextWidget from './newTextWidget';
 const applyConfig = (config) => {
   config.addonReducers = {
     ...config.addonReducers,
@@ -14,7 +13,6 @@ const applyConfig = (config) => {
   const appExtras = config.settings.appExtras || [];
 
   config.widgets.widget.jsonTextarea = TextareaJSONWidget;
-  config.widgets.widget.customText = CustomTextWidget;
   config.widgets.id.progress = VisualJSONWidget;
   config.settings.appExtras = [
     ...appExtras,

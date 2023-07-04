@@ -102,13 +102,14 @@ const SidebarComponent = (props) => {
   const backgroundColor = (currentContentType, modified) => {
     let color = undefined;
     if (modified) {
-      color = 'lightgray';
+      color = 'lightpink';
     }
     if (currentContentType) {
       color = 'lightblue';
     }
     return color;
   };
+
   return (
     <Sidebar
       as={List}
@@ -157,6 +158,7 @@ const EditDataComponent = ({
   currentContentType,
   value,
 }) => {
+  // console.log(request);
   //Returns the saved values for dropdown with the first letter in uppercase
   const getDropdownValues = (currentField) => {
     if (
@@ -171,6 +173,34 @@ const EditDataComponent = ({
 
     return undefined;
   };
+  const renderLabel = (label) => ({
+    color: 'blue',
+    content: `${label.text}`,
+  });
+  // const path = flattenToAppURL(
+  //   currentContentType?.['@id']
+  //     ? `${currentContentType['@id']}/@workflow.progress`
+  //     : null,
+  // );
+
+  // const dispatch = useDispatch();
+  // const requestOptions = useSelector((state) => state.rawdata?.[path]);
+
+  // const content = requestOptions?.data;
+  // React.useEffect(() => {
+  //   if (path && !requestOptions?.loading && !requestOptions?.loaded && !content)
+  //     dispatch(getRawContent(path));
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [
+  //   dispatch,
+  //   path,
+  //   content,
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  //   requestOptions?.loaded,
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  //   requestOptions?.loading,
+  // ]);
+  // console.log(currentContentType);
   return (
     <Segment
       style={{
@@ -189,36 +219,40 @@ const EditDataComponent = ({
       >
         {request?.loaded &&
           !request?.loading &&
-          request?.data?.fieldsets[0]?.fields?.map((currentField) => (
-            <List.Item key={currentField}>
-              <List.Content
-                floated="right"
-                verticalAlign="middle"
-                style={{ paddingTop: '10px' }}
-              >
-                {request?.loaded && !request?.loading && (
-                  <Dropdown
-                    placeholder="Fields"
-                    multiple
-                    floating
-                    selection
-                    search
-                    defaultValue={getDropdownValues(currentField)}
-                    options={STATES_NAME}
-                    onChange={(e, data) =>
-                      handleOnDropdownChange(e, data, currentField)
-                    }
-                  />
-                )}
-              </List.Content>
-              <List.Content
-                style={{ fontSize: '1.75rem', padding: '15px' }}
-                verticalAlign="middle"
-              >
-                {currentField}
-              </List.Content>
-            </List.Item>
-          ))}
+          request?.data?.fieldsets[0]?.fields?.map((currentField) => {
+            if (request.data.required.includes(currentField)) return null;
+            return (
+              <List.Item key={currentField}>
+                <List.Content
+                  floated="right"
+                  verticalAlign="middle"
+                  style={{ paddingTop: '10px' }}
+                >
+                  {request?.loaded && !request?.loading && (
+                    <Dropdown
+                      placeholder="Fields"
+                      multiple
+                      floating
+                      selection
+                      search
+                      defaultValue={getDropdownValues(currentField)}
+                      options={STATES_NAME}
+                      onChange={(e, data) =>
+                        handleOnDropdownChange(e, data, currentField)
+                      }
+                      renderLabel={renderLabel}
+                    />
+                  )}
+                </List.Content>
+                <List.Content
+                  style={{ fontSize: '1.75rem', padding: '15px' }}
+                  verticalAlign="middle"
+                >
+                  {currentField}
+                </List.Content>
+              </List.Item>
+            );
+          })}
       </List>
     </Segment>
   );
