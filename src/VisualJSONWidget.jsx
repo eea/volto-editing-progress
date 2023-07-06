@@ -17,17 +17,21 @@ import { FormattedMessage, defineMessages } from 'react-intl';
 import PropTypes from 'prop-types';
 import { useSelector, useDispatch } from 'react-redux';
 import { getRawContent } from './actions';
+
 const messages = defineMessages({
   jsonTitle: {
     id: 'Edit JSON',
     defaultMessage: 'Edit JSON',
   },
 });
+
 function makeFirstLetterCapital(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
+
 const SIDEBAR_WIDTH = '250px';
 const COMPONENT_HEIGHT = '750px';
+
 function isValidJson(json) {
   try {
     JSON.parse(json);
@@ -36,6 +40,7 @@ function isValidJson(json) {
     return false;
   }
 }
+
 function addNewStateToAlreadyExistingField(
   currentContentTypeData,
   currentField,
@@ -46,19 +51,21 @@ function addNewStateToAlreadyExistingField(
     localRuleIndex < currentContentTypeData.length;
     localRuleIndex++
   ) {
-    if (currentContentTypeData[localRuleIndex].prefix === currentField) {
-      if (statesToAdd !== undefined)
-        currentContentTypeData[localRuleIndex].states = statesToAdd;
-      else currentContentTypeData.splice(localRuleIndex, 1);
-    }
+    if (currentContentTypeData[localRuleIndex].prefix !== currentField)
+      continue;
+    if (statesToAdd !== undefined)
+      currentContentTypeData[localRuleIndex].states = statesToAdd;
+    else currentContentTypeData.splice(localRuleIndex, 1);
   }
 }
+
 function doesPrefixExistInCurrentContentTypeData(
   currentContentTypeData,
   currentField,
 ) {
   return currentContentTypeData.every((rule) => rule.prefix !== currentField);
 }
+
 function createFieldRule(currentField, statesToAdd) {
   return {
     prefix: currentField,
@@ -73,13 +80,16 @@ function createFieldRule(currentField, statesToAdd) {
     linkLabel: 'Add {label}',
   };
 }
+
 const SidebarComponent = (props) => {
   const { types, currentContentType, handleChangeSelectedContentType } = props;
   const [filtredTypes, setFiltredTypes] = useState({ ...types });
   const [inputValue, setInputValue] = useState('');
+
   useEffect(() => {
     setFiltredTypes({ ...types });
   }, [types]);
+
   const handleInputChange = (e) => {
     if (e.target.value == null) return;
     setInputValue(e.target.value);
@@ -97,6 +107,7 @@ const SidebarComponent = (props) => {
       });
     }
   };
+
   const backgroundColor = (currentContentType, modified) => {
     let color = undefined;
     if (modified) {
@@ -150,6 +161,7 @@ const SidebarComponent = (props) => {
     </Sidebar>
   );
 };
+
 const EditDataComponent = ({
   request,
   handleOnDropdownChange,
@@ -170,18 +182,20 @@ const EditDataComponent = ({
 
     return undefined;
   };
+
   const renderLabel = (label) => ({
     color: 'blue',
     content: `${label.text}`,
   });
+
   const path = flattenToAppURL(
     '/@vocabularies/plone.app.vocabularies.WorkflowStates',
   );
 
   const dispatch = useDispatch();
   const requestStateOptions = useSelector((state) => state.rawdata?.[path]);
-
   const content = requestStateOptions?.data;
+
   React.useEffect(() => {
     if (
       path &&
@@ -200,6 +214,7 @@ const EditDataComponent = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     requestStateOptions?.loading,
   ]);
+
   const createStateOption = (stateOptions) => {
     return stateOptions.map((state) => ({
       key: makeFirstLetterCapital(state),
@@ -207,6 +222,7 @@ const EditDataComponent = ({
       value: makeFirstLetterCapital(state),
     }));
   };
+
   return (
     <Segment
       style={{
@@ -271,29 +287,26 @@ const EditDataComponent = ({
 const VisualJSONWidget = (props) => {
   const { id, value = {}, onChange } = props;
   const [isJSONEditorOpen, setIsJSONEditorOpen] = useState(false);
-  const [modalTitle, setModalTitle] = useState(
-    props.intl.formatMessage(messages.jsonTitle),
-  );
   const [currentContentType, setCurrentContentType] = useState();
 
   const handleOnCancel = (e) => {
     setIsJSONEditorOpen(false);
   };
+
   const handleEditJSON = (e) => {
     e.preventDefault();
-    setModalTitle(props.intl.formatMessage(messages.jsonTitle));
     setIsJSONEditorOpen(true);
   };
+
   const onJSONSubmit = (e) => {
     setIsJSONEditorOpen(false);
-    if (typeof e.json === 'string') {
-      if (isValidJson(e.json)) {
-        onChange(id, JSON.parse(e.json));
-      }
-    } else {
-      onChange(id, e.json);
+    if (typeof e.json === 'string' && isValidJson(e.json)) {
+      onChange(id, JSON.parse(e.json));
+      return;
     }
+    onChange(id, e.json);
   };
+
   const types = useSelector((state) => state.types);
 
   useEffect(() => {
@@ -305,15 +318,16 @@ const VisualJSONWidget = (props) => {
   const handleChangeSelectedContentType = (e, type) => {
     setCurrentContentType(type);
   };
+
   const path = flattenToAppURL(
     currentContentType?.['@id'] ? `${currentContentType['@id']}` : null,
   );
 
   const dispatch = useDispatch();
   const request = useSelector((state) => state.rawdata?.[path]);
-
   const content = request?.data;
-  React.useEffect(() => {
+
+  useEffect(() => {
     if (path && !request?.loading && !request?.loaded && !content)
       dispatch(getRawContent(path));
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -348,6 +362,7 @@ const VisualJSONWidget = (props) => {
     if (localCopyOfValue[currentContentType.id]?.length === 0) {
       delete localCopyOfValue[currentContentType.id];
     }
+
     onChange(id, localCopyOfValue);
   };
 
@@ -358,7 +373,7 @@ const VisualJSONWidget = (props) => {
           <ModalForm
             schema={JSONSchema(props)}
             onSubmit={onJSONSubmit}
-            title={modalTitle}
+            title={props.intl.formatMessage(messages.jsonTitle)}
             open={isJSONEditorOpen}
             formData={{ json: JSON.stringify(value, undefined, 2) }}
             onCancel={handleOnCancel}
