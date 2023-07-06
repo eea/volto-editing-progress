@@ -7,8 +7,6 @@ import {
   Segment,
   Divider,
   Sidebar,
-  List,
-  Dropdown,
 } from 'semantic-ui-react';
 import { flattenToAppURL } from '@plone/volto/helpers';
 import './less/editor.less';
@@ -17,6 +15,8 @@ import { FormattedMessage, defineMessages } from 'react-intl';
 import PropTypes from 'prop-types';
 import { useSelector, useDispatch } from 'react-redux';
 import { getRawContent } from './actions';
+import SidebarComponent from './WidgetSidebar';
+import EditDataComponent from './WidgetDataComponent';
 
 const messages = defineMessages({
   jsonTitle: {
@@ -25,12 +25,8 @@ const messages = defineMessages({
   },
 });
 
-function makeFirstLetterCapital(string) {
-  return string.charAt(0).toUpperCase() + string.slice(1);
-}
-
-const SIDEBAR_WIDTH = '250px';
-const COMPONENT_HEIGHT = '750px';
+export const SIDEBAR_WIDTH = '250px';
+export const COMPONENT_HEIGHT = '750px';
 
 function isValidJson(json) {
   try {
@@ -81,213 +77,31 @@ function createFieldRule(currentField, statesToAdd) {
   };
 }
 
-const SidebarComponent = (props) => {
-  const { types, currentContentType, handleChangeSelectedContentType } = props;
-  const [filtredTypes, setFiltredTypes] = useState({ ...types });
-  const [inputValue, setInputValue] = useState('');
-
-  useEffect(() => {
-    setFiltredTypes({ ...types });
-  }, [types]);
-
-  const handleInputChange = (e) => {
-    if (e.target.value == null) return;
-    setInputValue(e.target.value);
-    if (
-      types.loaded &&
-      !types.loading &&
-      Array.isArray(types.types) &&
-      types.types.length > 0
-    ) {
-      setFiltredTypes({
-        ...types,
-        types: types.types.filter((type) =>
-          type.title.toLowerCase().includes(e.target.value.toLowerCase()),
-        ),
-      });
-    }
-  };
-
-  const backgroundColor = (currentContentType, modified) => {
-    let color = undefined;
-    if (modified) {
-      color = 'lightpink';
-    }
-    if (currentContentType) {
-      color = 'lightblue';
-    }
-    return color;
-  };
-
-  return (
-    <Sidebar
-      as={List}
-      animation="push"
-      icon="labeled"
-      visible
-      relaxed
-      size="big"
-      divided
-      selection
-      style={{ width: SIDEBAR_WIDTH }}
-    >
-      <input
-        value={inputValue}
-        onChange={handleInputChange}
-        placeholder="Search... "
-        style={{ paddingLeft: ' 10px' }}
-      />
-      {filtredTypes.loaded &&
-        !filtredTypes.loading &&
-        Array.isArray(filtredTypes.types) &&
-        filtredTypes.types.map((type) => (
-          <List.Item
-            style={{
-              padding: '25px 5px',
-              textAlign: 'center',
-              backgroundColor: backgroundColor(
-                currentContentType?.id === type.id,
-                Object.keys(props.value).includes(type.id),
-              ),
-            }}
-            key={type.id}
-            onClick={(e) => handleChangeSelectedContentType(e, type)}
-          >
-            <List.Content>
-              <List.Header>{type.title}</List.Header>
-            </List.Content>
-          </List.Item>
-        ))}
-    </Sidebar>
-  );
-};
-
-const EditDataComponent = ({
-  request,
-  handleOnDropdownChange,
-  currentContentType,
-  value,
-}) => {
-  //Returns the saved values for dropdown with the first letter in uppercase
-  const getDropdownValues = (currentField) => {
-    if (
-      !request.loading &&
-      request.loaded &&
-      currentContentType &&
-      value[currentContentType.id]
-    )
-      return value[currentContentType.id]
-        .find((rule) => rule.prefix === currentField)
-        ?.states.map((state) => makeFirstLetterCapital(state));
-
-    return undefined;
-  };
-
-  const renderLabel = (label) => ({
-    color: 'blue',
-    content: `${label.text}`,
-  });
-
-  const path = flattenToAppURL(
-    '/@vocabularies/plone.app.vocabularies.WorkflowStates',
-  );
-
-  const dispatch = useDispatch();
-  const requestStateOptions = useSelector((state) => state.rawdata?.[path]);
-  const content = requestStateOptions?.data;
-
-  React.useEffect(() => {
-    if (
-      path &&
-      !requestStateOptions?.loading &&
-      !requestStateOptions?.loaded &&
-      !content
-    )
-      dispatch(getRawContent(path));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    dispatch,
-    path,
-    content,
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    requestStateOptions?.loaded,
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    requestStateOptions?.loading,
-  ]);
-
-  const createStateOption = (stateOptions) => {
-    return stateOptions.map((state) => ({
-      key: makeFirstLetterCapital(state),
-      text: makeFirstLetterCapital(state),
-      value: makeFirstLetterCapital(state),
-    }));
-  };
-
-  return (
-    <Segment
-      style={{
-        width: '100%',
-        paddingBottom:
-          request?.data?.fieldsets[0]?.fields.length > 9 ? '120px' : '',
-        maxHeight: COMPONENT_HEIGHT,
-        overflow: request?.data?.fieldsets[0]?.fields.length > 9 ? 'auto' : '',
-      }}
-    >
-      <List
-        divided
-        relaxed
-        verticalAlign="middle"
-        style={{ width: '100%', height: '100%' }}
-      >
-        {request?.loaded &&
-          !request?.loading &&
-          requestStateOptions?.loaded &&
-          !requestStateOptions?.loading &&
-          requestStateOptions?.data &&
-          request?.data?.fieldsets[0]?.fields?.map((currentField) => {
-            if (request.data.required.includes(currentField)) return null;
-            return (
-              <List.Item key={currentField}>
-                <List.Content
-                  floated="right"
-                  verticalAlign="middle"
-                  style={{ paddingTop: '10px' }}
-                >
-                  <Dropdown
-                    placeholder="Fields"
-                    multiple
-                    floating
-                    selection
-                    search
-                    defaultValue={getDropdownValues(currentField)}
-                    options={createStateOption(
-                      requestStateOptions.data.items.map(
-                        (option) => option.token,
-                      ),
-                    )}
-                    onChange={(e, data) =>
-                      handleOnDropdownChange(e, data, currentField)
-                    }
-                    renderLabel={renderLabel}
-                  />
-                </List.Content>
-                <List.Content
-                  style={{ fontSize: '1.75rem', padding: '15px' }}
-                  verticalAlign="middle"
-                >
-                  {currentField}
-                </List.Content>
-              </List.Item>
-            );
-          })}
-      </List>
-    </Segment>
-  );
-};
 const VisualJSONWidget = (props) => {
   const { id, value = {}, onChange } = props;
   const [isJSONEditorOpen, setIsJSONEditorOpen] = useState(false);
   const [currentContentType, setCurrentContentType] = useState();
+
+  const path = flattenToAppURL(
+    currentContentType?.['@id'] ? `${currentContentType['@id']}` : null,
+  );
+
+  const dispatch = useDispatch();
+  const request = useSelector((state) => state.rawdata?.[path]);
+  const content = request?.data;
+  const types = useSelector((state) => state.types);
+
+  useEffect(() => {
+    if (path && !request?.loading && !request?.loaded && !content)
+      dispatch(getRawContent(path));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch, path, content, request?.loaded, request?.loading]);
+
+  useEffect(() => {
+    if (types.loaded && !types.loading && Array.isArray(types.types)) {
+      setCurrentContentType(types.types[0]);
+    }
+  }, [types]);
 
   const handleOnCancel = (e) => {
     setIsJSONEditorOpen(false);
@@ -307,31 +121,9 @@ const VisualJSONWidget = (props) => {
     onChange(id, e.json);
   };
 
-  const types = useSelector((state) => state.types);
-
-  useEffect(() => {
-    if (types.loaded && !types.loading && Array.isArray(types.types)) {
-      setCurrentContentType(types.types[0]);
-    }
-  }, [types]);
-
   const handleChangeSelectedContentType = (e, type) => {
     setCurrentContentType(type);
   };
-
-  const path = flattenToAppURL(
-    currentContentType?.['@id'] ? `${currentContentType['@id']}` : null,
-  );
-
-  const dispatch = useDispatch();
-  const request = useSelector((state) => state.rawdata?.[path]);
-  const content = request?.data;
-
-  useEffect(() => {
-    if (path && !request?.loading && !request?.loaded && !content)
-      dispatch(getRawContent(path));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, path, content, request?.loaded, request?.loading]);
 
   const handleOnDropdownChange = (e, data, currentField) => {
     const states = data.value.length > 0 ? data.value : undefined;
