@@ -20,7 +20,7 @@
 
 Document Editing progress bar in Volto
 
-![Editing Progress](https://github.com/eea/volto-editing-progress/raw/develop/docs/volto-editing-progress.gif)
+![Editing Progress](./docs/volto-editing-progress.gif)
 
 ## Getting started
 
