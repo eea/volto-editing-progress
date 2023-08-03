@@ -2,6 +2,17 @@ import React, { useEffect, useState } from 'react';
 import { Sidebar, List } from 'semantic-ui-react';
 import { SIDEBAR_WIDTH } from './VisualJSONWidget';
 
+export const backgroundColor = (currentContentType, modified) => {
+  let color = undefined;
+  if (modified) {
+    color = 'lightpink';
+  }
+  if (currentContentType) {
+    color = 'lightblue';
+  }
+  return color;
+};
+
 const SidebarComponent = (props) => {
   const { types, currentContentType, handleChangeSelectedContentType } = props;
   const [filtredTypes, setFiltredTypes] = useState({ ...types });
@@ -27,17 +38,6 @@ const SidebarComponent = (props) => {
         ),
       });
     }
-  };
-
-  const backgroundColor = (currentContentType, modified) => {
-    let color = undefined;
-    if (modified) {
-      color = 'lightpink';
-    }
-    if (currentContentType) {
-      color = 'lightblue';
-    }
-    return color;
   };
 
   return (
@@ -72,6 +72,7 @@ const SidebarComponent = (props) => {
               ),
             }}
             key={type.id}
+            id={`sidebar_${type.id}`}
             onClick={(e) => handleChangeSelectedContentType(e, type)}
           >
             <List.Content>

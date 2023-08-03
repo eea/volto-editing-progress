@@ -1,7 +1,4 @@
-import {
-  EDITING_PROGRESS,
-  GET_RAW_CONTENT,
-} from '@eeacms/volto-editing-progress/actionTypes';
+import { EDITING_PROGRESS, GET_RAW_CONTENT } from '../actionTypes';
 /**
  * getEditingProgress function.
  * @function getEditingProgress

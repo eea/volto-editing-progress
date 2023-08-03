@@ -5,7 +5,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { getRawContent } from './actions';
 import { COMPONENT_HEIGHT } from './VisualJSONWidget';
 
-function makeFirstLetterCapital(string) {
+export function makeFirstLetterCapital(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
@@ -94,7 +94,7 @@ const EditDataComponent = ({
           request?.data?.fieldsets[0]?.fields?.map((currentField) => {
             if (request.data.required.includes(currentField)) return null;
             return (
-              <List.Item key={currentField}>
+              <List.Item key={currentField} id={`pusher_${currentField}`}>
                 <List.Content
                   floated="right"
                   verticalAlign="middle"

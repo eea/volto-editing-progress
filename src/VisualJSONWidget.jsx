@@ -11,7 +11,7 @@ import {
 import { flattenToAppURL } from '@plone/volto/helpers';
 import './less/editor.less';
 import _ from 'lodash';
-import { FormattedMessage, defineMessages } from 'react-intl';
+import { FormattedMessage, defineMessages, injectIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import { useSelector, useDispatch } from 'react-redux';
 import { getRawContent } from './actions';
@@ -161,19 +161,19 @@ const VisualJSONWidget = (props) => {
   return (
     <>
       <div>
-        {isJSONEditorOpen && (
-          <ModalForm
-            schema={JSONSchema(props)}
-            onSubmit={onJSONSubmit}
-            title={props.intl.formatMessage(messages.jsonTitle)}
-            open={isJSONEditorOpen}
-            formData={{ json: JSON.stringify(value, undefined, 2) }}
-            onCancel={handleOnCancel}
-            key="JSON"
-          />
-        )}
+        {/* {isJSONEditorOpen && ( */}
+        <ModalForm
+          schema={JSONSchema(props)}
+          onSubmit={onJSONSubmit}
+          title={props.intl.formatMessage(messages.jsonTitle)}
+          open={isJSONEditorOpen}
+          formData={{ json: JSON.stringify(value, undefined, 2) }}
+          onCancel={handleOnCancel}
+          key="JSON"
+        />
+        {/* )} */}
         <Container>
-          <Button onClick={handleEditJSON} color="grey">
+          <Button onClick={handleEditJSON} color="grey" id="json_button">
             <FormattedMessage id="Edit JSON" defaultMessage="Edit JSON" />
           </Button>
         </Container>
@@ -230,5 +230,7 @@ VisualJSONWidget.defaultProps = {
   onChange: null,
   onEdit: null,
   onDelete: null,
+  title: '',
+  id: '',
 };
-export default VisualJSONWidget;
+export default injectIntl(VisualJSONWidget);
