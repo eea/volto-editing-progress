@@ -11,4 +11,7 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: \n"
 
-
+#: TextareaJSONWidget
+# defaultMessage: Please enter valid JSON!
+msgid "Please enter valid JSON!"
+msgstr ""
