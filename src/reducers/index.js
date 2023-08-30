@@ -3,7 +3,10 @@
  * @module reducers/editingProgress
  */
 
-import { EDITING_PROGRESS } from '@eeacms/volto-editing-progress/actionTypes';
+import {
+  EDITING_PROGRESS,
+  GET_RAW_CONTENT,
+} from '@eeacms/volto-editing-progress/actionTypes';
 
 const initialState = {
   get: {
@@ -65,4 +68,44 @@ export function editingProgress(state = initialState, action = {}) {
     default:
       return state;
   }
+}
+export function rawdata(state = {}, action = {}) {
+  let { result, url } = action;
+
+  switch (action.type) {
+    case `${GET_RAW_CONTENT}_PENDING`:
+      return {
+        ...state,
+        [url]: {
+          ...state[url],
+          loading: true,
+          loaded: false,
+          error: undefined,
+        },
+      };
+    case `${GET_RAW_CONTENT}_SUCCESS`:
+      return {
+        ...state,
+        [url]: {
+          ...state[url],
+          loading: false,
+          loaded: true,
+          error: undefined,
+          data: result,
+        },
+      };
+    case `${GET_RAW_CONTENT}_FAIL`:
+      return {
+        ...state,
+        [url]: {
+          ...state[url],
+          loading: false,
+          loaded: false,
+          error: action.error,
+        },
+      };
+    default:
+      break;
+  }
+  return state;
 }

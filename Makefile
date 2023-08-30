@@ -125,6 +125,11 @@ i18n:			## i18n
 	rm -rf build/messages
 	NODE_ENV=development $(NODE_MODULES)/.bin/i18n --addon
 
+.PHONY: test
+test:			## Run jest tests
+	docker pull plone/volto-addon-ci
+	docker run -it --rm -e NAMESPACE="@eeacms" -e GIT_NAME="${DIR}" -e RAZZLE_JEST_CONFIG=jest-addon.config.js -v "$(pwd):/opt/frontend/my-volto-project/src/addons/${DIR}" -e CI="true" plone/volto-addon-ci
+
 .PHONY: help
 help:                   ## Show this help.
 	@echo -e "$$(grep -hE '^\S+:.*##' $(MAKEFILE_LIST) | sed -e 's/:.*##\s*/:/' -e 's/^\(.\+\):\(.*\)/\\x1b[36m\1\\x1b[m:\2/' | column -c2 -t -s :)"
