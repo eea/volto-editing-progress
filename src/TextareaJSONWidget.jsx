@@ -27,7 +27,9 @@ function isValidJson(json) {
 }
 
 const TextAreaJSONWidget = (props) => {
-  const { id, value = '', onChange, placeholder, isDisabled, intl } = props;
+  const { id, onChange, placeholder, isDisabled, intl } = props;
+  const value =
+    typeof props.value === 'string' ? JSON.parse(props.value) : props.value;
   const [invalidJSONError, setInvalidJSONError] = useState([]);
   const [prevValue, setPrevValue] = useState(value);
 
@@ -76,17 +78,19 @@ const TextAreaJSONWidget = (props) => {
  * @static
  */
 TextAreaJSONWidget.propTypes = {
-  id: PropTypes.string.isRequired,
-  title: PropTypes.string.isRequired,
-  description: PropTypes.string,
-  required: PropTypes.bool,
-  error: PropTypes.arrayOf(PropTypes.string),
-  value: PropTypes.object,
-  onChange: PropTypes.func,
-  onEdit: PropTypes.func,
-  onDelete: PropTypes.func,
-  wrapped: PropTypes.bool,
-  placeholder: PropTypes.string,
+  widgetProps: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    title: PropTypes.string.isRequired,
+    description: PropTypes.string,
+    required: PropTypes.bool,
+    error: PropTypes.arrayOf(PropTypes.string),
+    value: PropTypes.object,
+    onChange: PropTypes.func,
+    onEdit: PropTypes.func,
+    onDelete: PropTypes.func,
+    wrapped: PropTypes.bool,
+    placeholder: PropTypes.string,
+  }),
 };
 
 /**
@@ -95,13 +99,15 @@ TextAreaJSONWidget.propTypes = {
  * @static
  */
 TextAreaJSONWidget.defaultProps = {
-  description: null,
-  required: false,
-  error: [],
-  value: null,
-  onChange: null,
-  onEdit: null,
-  onDelete: null,
+  widgetProps: {
+    description: null,
+    required: false,
+    error: [],
+    value: null,
+    onChange: null,
+    onEdit: null,
+    onDelete: null,
+  },
 };
 
 export default injectIntl(TextAreaJSONWidget);

@@ -58,7 +58,6 @@ const EditingProgress = (props) => {
       dispatch(getEditingProgress(basePathname));
     }
   }, [dispatch, isAuth, basePathname, fetchCondition, contentContainsPathname]);
-
   return isAuth &&
     contentContainsPathname &&
     editingProgressSteps &&
