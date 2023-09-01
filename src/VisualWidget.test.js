@@ -7,13 +7,6 @@ import configureStore from 'redux-mock-store';
 import VisualJSONWidget from './VisualJSONWidget';
 import { backgroundColor } from './WidgetSidebar';
 const mockStore = configureStore();
-const props = {
-  content: {
-    '@id': 'http://localhost:3000/api/',
-    review_state: 'pending',
-  },
-  pathname: '/',
-};
 const propsEmpty = {};
 describe('Widget Data Component', () => {
   it('should make first letter capital', () => {
