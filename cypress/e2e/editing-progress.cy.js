@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-expressions */
 describe('Editing progress', () => {
   before(() => {
     cy.autologin();
@@ -72,10 +73,15 @@ describe('Editing progress', () => {
   it('should turn pink', () => {
     cy.get('#sidebar_music').click({ force: true });
     cy.wait(100);
-    cy.get("#pusher_name [role='combobox']").click({ force: true });
-    cy.get("#pusher_name [role='combobox'] [role='listbox']")
+    cy.get('#property_name').click({ force: true });
+    cy.wait(100);
+    cy.get("#property_content_name [role='combobox']").click({ force: true });
+    cy.wait(100);
+    cy.get("#property_content_name [role='combobox'] [role='listbox']")
       .contains('Private')
       .click({ force: true });
+    cy.wait(100);
+
     cy.get('#sidebar_article').click({ force: true });
     cy.wait(100);
     cy.get('#sidebar_music').should(
@@ -87,9 +93,16 @@ describe('Editing progress', () => {
   it('deletes and adds fields', () => {
     cy.get('#sidebar_music').click({ force: true });
     cy.wait(100);
-    cy.get("#pusher_name [role='combobox'] .delete").click({ force: true });
+    cy.get('#property_name').click({ force: true });
     cy.wait(100);
-    cy.get("#pusher_name [role='combobox']").find('a').should('not.exist');
+
+    cy.get("#property_content_name [role='combobox'] .delete").click({
+      force: true,
+    });
+    cy.wait(100);
+    cy.get("#property_content_name [role='combobox']")
+      .find('a')
+      .should('not.exist');
     cy.get('#sidebar_article').click({ force: true });
     cy.wait(100);
     cy.get('#sidebar_music').should(
@@ -110,14 +123,18 @@ describe('Editing progress', () => {
       labelReady: 'You added the {label}',
       link: 'edit#fieldset-supporting information-field-label-data_description',
       linkLabel: 'Add {label}',
+      message: '',
     };
     cy.wait(100);
     cy.get('#sidebar_music').click({ force: true });
     cy.wait(100);
-    cy.get("#pusher_name [role='combobox']").click({ force: true });
+    cy.get('#property_name').click({ force: true });
     cy.wait(100);
 
-    cy.get("#pusher_name [role='combobox'] [role='listbox']")
+    cy.get("#property_content_name [role='combobox']").click({ force: true });
+    cy.wait(100);
+
+    cy.get("#property_content_name [role='combobox'] [role='listbox']")
       .contains('Private')
       .click({ force: true });
     cy.wait(100);
@@ -130,7 +147,9 @@ describe('Editing progress', () => {
           .to.be.true;
       });
     cy.get(".modal [aria-label='Cancel']").click();
-    cy.get("#pusher_name [role='combobox'] .delete").click({ force: true });
+    cy.get("#property_content_name [role='combobox'] .delete").click({
+      force: true,
+    });
   });
   it('should modify json in correct way', () => {
     const json = {
@@ -144,23 +163,32 @@ describe('Editing progress', () => {
       labelReady: 'You added the {label}',
       link: 'edit#fieldset-supporting information-field-label-data_description',
       linkLabel: 'Add {label}',
+      message: '',
     };
 
     cy.wait(100);
     cy.get('#sidebar_music').click({ force: true });
     cy.wait(100);
-    cy.get("#pusher_name [role='combobox']").click({ force: true });
+    cy.get('#property_name').click({ force: true });
     cy.wait(100);
-    cy.get("#pusher_name [role='combobox'] [role='listbox']")
+
+    cy.get("#property_content_name  [role='combobox']").click({ force: true });
+    cy.wait(100);
+    cy.get("#property_content_name  [role='combobox'] [role='listbox']")
       .contains('Private')
       .click({ force: true });
-    cy.get("#pusher_name [role='combobox'] [role='listbox']")
+    cy.get("#property_content_name  [role='combobox'] [role='listbox']")
       .contains('Pending')
       .click({ force: true });
     cy.wait(100);
-    cy.get("#pusher_description [role='combobox']").click({ force: true });
+    cy.get('#property_description').click({ force: true });
     cy.wait(100);
-    cy.get("#pusher_description [role='combobox'] [role='listbox']")
+
+    cy.get("#property_content_description [role='combobox']").click({
+      force: true,
+    });
+    cy.wait(100);
+    cy.get("#property_content_description [role='combobox'] [role='listbox']")
       .contains('Private')
       .click({ force: true });
     cy.wait(100);
@@ -175,7 +203,9 @@ describe('Editing progress', () => {
           .to.be.true;
       });
     cy.get(".modal [aria-label='Cancel']").click();
-    cy.get("#pusher_name [role='combobox'] .delete").click({
+    cy.get('#property_name').click({ force: true });
+    cy.wait(100);
+    cy.get("#property_content_name [role='combobox'] .delete").click({
       force: true,
       multiple: true,
     });
@@ -189,7 +219,9 @@ describe('Editing progress', () => {
         expect(JSON.parse(text)['music'] != null).to.be.true;
       });
     cy.get(".modal [aria-label='Cancel']").click();
-    cy.get("#pusher_description [role='combobox'] .delete").click({
+    cy.get('#property_description').click({ force: true });
+    cy.wait(100);
+    cy.get("#property_content_description [role='combobox'] .delete").click({
       force: true,
       multiple: true,
     });

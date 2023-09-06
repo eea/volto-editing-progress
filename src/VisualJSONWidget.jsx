@@ -17,7 +17,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { getRawContent } from './actions';
 import SidebarComponent from './WidgetSidebar';
 import EditDataComponent from './WidgetDataComponent';
-
+import './less/editor.less';
 const messages = defineMessages({
   jsonTitle: {
     id: 'Edit JSON',
@@ -41,6 +41,7 @@ function addNewStateToAlreadyExistingField(
   currentContentTypeData,
   currentField,
   statesToAdd,
+  message,
 ) {
   for (
     let localRuleIndex = 0;
@@ -49,9 +50,15 @@ function addNewStateToAlreadyExistingField(
   ) {
     if (currentContentTypeData[localRuleIndex].prefix !== currentField)
       continue;
-    if (statesToAdd !== undefined)
+
+    // TODO rewrite message as an object with multiple message as a key and add it
+    // to currentContentTypeData dinamically in order to create the posibillity
+    // for multiple fields
+
+    if (message) currentContentTypeData[localRuleIndex].message = message;
+    if (statesToAdd !== undefined) {
       currentContentTypeData[localRuleIndex].states = statesToAdd;
-    else currentContentTypeData.splice(localRuleIndex, 1);
+    } else if (!message) currentContentTypeData.splice(localRuleIndex, 1);
   }
 }
 
@@ -74,11 +81,13 @@ function createFieldRule(currentField, statesToAdd) {
     labelReady: 'You added the {label}',
     link: 'edit#fieldset-supporting information-field-label-data_description',
     linkLabel: 'Add {label}',
+    message: '',
   };
 }
 
 const VisualJSONWidget = (props) => {
   const { id, value = {}, onChange } = props;
+  console.log(value);
   const [isJSONEditorOpen, setIsJSONEditorOpen] = useState(false);
   const [currentContentType, setCurrentContentType] = useState();
 
@@ -125,13 +134,13 @@ const VisualJSONWidget = (props) => {
     setCurrentContentType(type);
   };
 
-  const handleOnDropdownChange = (e, data, currentField) => {
-    const states = data.value.length > 0 ? data.value : undefined;
+  const handleOnDropdownChange = (e, data, currentField, message) => {
+    const states = data?.value?.length > 0 ? data?.value : undefined;
     const statesToAdd = states?.map((state) => state.toLowerCase());
     const localCopyOfValue = _.cloneDeep(value);
     const currentContentTypeData = localCopyOfValue[currentContentType.id];
 
-    if (!currentContentTypeData) {
+    if (!currentContentTypeData && data) {
       //Reference doesn't work with currentContentTypeData
       localCopyOfValue[currentContentType.id] = [
         createFieldRule(currentField, statesToAdd),
@@ -140,7 +149,8 @@ const VisualJSONWidget = (props) => {
       doesPrefixExistInCurrentContentTypeData(
         currentContentTypeData,
         currentField,
-      )
+      ) &&
+      data
     ) {
       currentContentTypeData.push(createFieldRule(currentField, statesToAdd));
     } else {
@@ -148,30 +158,30 @@ const VisualJSONWidget = (props) => {
         currentContentTypeData,
         currentField,
         statesToAdd,
+        message,
       );
     }
     //The variable currentContentTypeData cannot be used here because of eslint and delete keyword
     if (localCopyOfValue[currentContentType.id]?.length === 0) {
       delete localCopyOfValue[currentContentType.id];
     }
-
     onChange(id, localCopyOfValue);
   };
 
   return (
     <>
       <div>
-        {/* {isJSONEditorOpen && ( */}
-        <ModalForm
-          schema={JSONSchema(props)}
-          onSubmit={onJSONSubmit}
-          title={props.intl.formatMessage(messages.jsonTitle)}
-          open={isJSONEditorOpen}
-          formData={{ json: JSON.stringify(value, undefined, 2) }}
-          onCancel={handleOnCancel}
-          key="JSON"
-        />
-        {/* )} */}
+        {isJSONEditorOpen && (
+          <ModalForm
+            schema={JSONSchema(props)}
+            onSubmit={onJSONSubmit}
+            title={props.intl.formatMessage(messages.jsonTitle)}
+            open={isJSONEditorOpen}
+            formData={{ json: JSON.stringify(value, undefined, 2) }}
+            onCancel={handleOnCancel}
+            key="JSON"
+          />
+        )}
         <Container>
           <Button onClick={handleEditJSON} color="grey" id="json_button">
             <FormattedMessage id="Edit JSON" defaultMessage="Edit JSON" />
