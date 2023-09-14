@@ -15,6 +15,7 @@ export const backgroundColor = (currentContentType, modified) => {
 
 const SidebarComponent = (props) => {
   const { types, currentContentType, handleChangeSelectedContentType } = props;
+  // console.log(types);
   const [filtredTypes, setFiltredTypes] = useState({ ...types });
   const [inputValue, setInputValue] = useState('');
 
