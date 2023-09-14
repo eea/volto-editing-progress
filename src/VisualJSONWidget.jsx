@@ -87,7 +87,7 @@ function createFieldRule(currentField, statesToAdd) {
 
 const VisualJSONWidget = (props) => {
   const { id, value = {}, onChange } = props;
-  console.log(value);
+  // console.log(value);
   const [isJSONEditorOpen, setIsJSONEditorOpen] = useState(false);
   const [currentContentType, setCurrentContentType] = useState();
 
