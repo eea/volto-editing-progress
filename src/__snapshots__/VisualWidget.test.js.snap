@@ -67,14 +67,7 @@ Array [
         }
       >
         <div
-          className="ui divided relaxed middle aligned list"
-          role="list"
-          style={
-            Object {
-              "height": "100%",
-              "width": "100%",
-            }
-          }
+          className="accordion ui fluid styled"
         />
       </div>
     </div>
