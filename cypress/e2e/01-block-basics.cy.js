@@ -56,13 +56,19 @@ describe('Blocks Tests', () => {
 
     cy.contains('Editing Progress').click();
 
+    cy.get('#field-progress').should('be.visible');
     cy.get('#field-progress')
+      .should('be.visible')
+      .should('be.enabled')
       .dblclick()
       .invoke('val', `test:test`)
       .click()
       .type('{enter}');
 
+    cy.get('#field-progress').should('be.visible');
     cy.get('#field-progress')
+      .should('be.visible')
+      .should('be.enabled')
       .dblclick()
       .invoke('val', documentStep)
       .click()
