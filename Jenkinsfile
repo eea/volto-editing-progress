@@ -1,7 +1,7 @@
 pipeline {
 
   agent {
-            node { label "docker-host" }
+       node { label "docker-host" }
   }
 
   environment {
@@ -10,7 +10,7 @@ pipeline {
         SONARQUBE_TAGS = "volto.eea.europa.eu,www.eea.europa.eu-ims,climate-energy.eea.europa.eu,demo-www.eea.europa.eu,www.eea.europa.eu-en,climate-adapt.eea.europa.eu"
         DEPENDENCIES = ""
         VOLTO = "16"
-    }
+  }
 
   stages {
 
@@ -55,7 +55,7 @@ pipeline {
      }
 
 
-    stage('Tests') {
+    stage('Run Tests') {
       when {
         anyOf {
           allOf {
@@ -159,7 +159,7 @@ pipeline {
         }
      }
    }
-
+    }
     stage('Report to SonarQube') {
       when {
         anyOf {
