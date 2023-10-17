@@ -149,3 +149,5 @@ cypress-ci:
 	make start-ci
 	$(NODE_MODULES)/.bin/wait-on -t 240000  http://localhost:3000
 	make cypress-run
+
+
