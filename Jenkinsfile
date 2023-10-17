@@ -148,7 +148,7 @@ pipeline {
               script {
                 try {
                   sh '''docker run --pull always --rm -d --name="$BUILD_TAG-plone" -e SITE="Plone" -e PROFILES="eea.kitkat:testing" eeacms/plone-backend'''
-                  sh '''docker run --link $BUILD_TAG-plone:plone --entrypoint=make --name="$BUILD_TAG-cypress" --workdir=/app/src/addons/volto-banner -e "CI=true" -e "NODE_ENV=development" -e "RAZZLE_JEST_CONFIG=src/addons/volto-banner/jest-addon.config.js" -e "RAZZLE_INTERNAL_API_PATH=http://plone:8080/Plone" -e "RAZZLE_DEV_PROXY_API_PATH=http://plone:8080/Plone" -e "CYPRESS_API_PATH=http://plone:8080/Plone" -e "RAZZLE_API_PATH=http://plone:8080/Plone" $BUILD_TAG-frontend cypress-ci'''                
+                  sh '''docker run --link $BUILD_TAG-plone:plone --entrypoint=make --name="$BUILD_TAG-cypress" --workdir=/app/src/addons/${GIT_NAME} -e "CI=true" -e "NODE_ENV=development" -e "RAZZLE_JEST_CONFIG=src/addons/${GIT_NAME}/jest-addon.config.js" -e "RAZZLE_INTERNAL_API_PATH=http://plone:8080/Plone" -e "RAZZLE_DEV_PROXY_API_PATH=http://plone:8080/Plone" -e "CYPRESS_API_PATH=http://plone:8080/Plone" -e "RAZZLE_API_PATH=http://plone:8080/Plone" $BUILD_TAG-frontend cypress-ci'''                
                  } finally {
                   try {
                     sh '''rm -rf cypress-reports cypress-results cypress-coverage'''
