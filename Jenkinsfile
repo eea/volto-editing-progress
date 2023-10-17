@@ -71,7 +71,7 @@ pipeline {
           }
         }
       }
-      parallel {
+      stages {
           stage("ES lint") {
               steps {
                  sh '''docker run --rm --name="$BUILD_TAG-eslint" --entrypoint=make --workdir=/app/src/addons/$GIT_NAME  $BUILD_TAG-frontend lint'''
@@ -89,11 +89,13 @@ pipeline {
                  sh '''docker run --rm --name="$BUILD_TAG-prettier" --entrypoint=make --workdir=/app/src/addons/$GIT_NAME  $BUILD_TAG-frontend prettier'''
                }
           }
-     
-          stage('Tests') {
-            steps {
-              script {
-                try {
+        
+         stage('Coverage Tests') {
+           parallel {
+              stage('Unit tests') {
+              steps {
+                script {
+                  try {
                   sh '''docker run --name="$BUILD_TAG-volto" --entrypoint=make --workdir=/app/src/addons/$GIT_NAME  $BUILD_TAG-frontend test-ci'''
                   sh '''rm -rf xunit-reports'''
                   sh '''mkdir -p xunit-reports'''
@@ -118,9 +120,8 @@ pipeline {
               }
             }
          }
-        }
-     stage('Integration tests') {
-      steps {
+       stage('Integration tests') {
+         steps {
               script {
                 try {
                   sh '''docker run --pull always --rm -d --name="$BUILD_TAG-plone" -e SITE="Plone" -e PROFILES="eea.kitkat:testing" eeacms/plone-backend'''
@@ -157,6 +158,9 @@ pipeline {
           }
         }
      }
+    }
+         }
+      }
     }
     stage('Report to SonarQube') {
       when {
