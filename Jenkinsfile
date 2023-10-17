@@ -1,5 +1,8 @@
 pipeline {
-  agent any
+
+  agent {
+            node { label "docker-host" }
+  }
 
   environment {
         GIT_NAME = "volto-editing-progress"
@@ -28,6 +31,29 @@ pipeline {
       }
     }
 
+
+    stage('Build test image') {
+      when {
+        anyOf {
+          allOf {
+            not { environment name: 'CHANGE_ID', value: '' }
+            environment name: 'CHANGE_TARGET', value: 'develop'
+          }
+          allOf {
+            environment name: 'CHANGE_ID', value: ''
+            anyOf {
+              not { changelog '.*^Automated release [0-9\\.]+$' }
+              branch 'master'
+            }
+          }
+        }
+      }
+      steps {
+        sh '''docker build --build-arg="VOLTO_VERSION=$VOLTO" --build-arg="ADDON_NAME=$NAMESPACE/$GIT_NAME"  --build-arg="ADDON_PATH=$GIT_NAME" . -t $BUILD_TAG-frontend'''
+      }
+     }
+
+
     stage('Code') {
       when {
         allOf {
@@ -37,28 +63,20 @@ pipeline {
         }
       }
       steps {
-        parallel(
-
           "ES lint": {
-            node(label: 'docker') {
-              sh '''docker run -i --rm --name="$BUILD_TAG-eslint" -e NAMESPACE="$NAMESPACE" -e GIT_NAME=$GIT_NAME -e GIT_BRANCH="$BRANCH_NAME" -e GIT_CHANGE_ID="$CHANGE_ID" -e VOLTO=$VOLTO plone/volto-addon-ci eslint'''
-            }
+              sh '''docker run --rm --name="$BUILD_TAG-eslint" --entrypoint=make --workdir=/app/src/addons/$GIT_NAME  $BUILD_TAG-frontend lint'''
           },
 
           "Style lint": {
-            node(label: 'docker') {
-              sh '''docker run -i --rm --name="$BUILD_TAG-stylelint" -e NAMESPACE="$NAMESPACE" -e GIT_NAME=$GIT_NAME -e GIT_BRANCH="$BRANCH_NAME" -e GIT_CHANGE_ID="$CHANGE_ID" -e VOLTO=$VOLTO plone/volto-addon-ci stylelint'''
-            }
+               sh '''docker run --rm --name="$BUILD_TAG-stylelint" --entrypoint=make --workdir=/app/src/addons/$GIT_NAME  $BUILD_TAG-frontend stylelint'''
+
           },
 
           "Prettier": {
-            node(label: 'docker') {
-              sh '''docker run -i --rm --name="$BUILD_TAG-prettier" -e NAMESPACE="$NAMESPACE" -e GIT_NAME=$GIT_NAME -e GIT_BRANCH="$BRANCH_NAME" -e GIT_CHANGE_ID="$CHANGE_ID" -e VOLTO=$VOLTO plone/volto-addon-ci prettier'''
-            }
+               sh '''docker run --rm --name="$BUILD_TAG-prettier" --entrypoint=make --workdir=/app/src/addons/$GIT_NAME  $BUILD_TAG-frontend prettier'''
+           }
           }
-        )
       }
-    }
 
     stage('Tests') {
       when {
@@ -77,21 +95,15 @@ pipeline {
         }
       }
       steps {
-        parallel(
-
           "Volto": {
-            node(label: 'docker') {
               script {
                 try {
-                  sh '''docker pull plone/volto-addon-ci'''
-                  sh '''docker run -i --name="$BUILD_TAG-volto" -e NAMESPACE="$NAMESPACE" -e GIT_NAME=$GIT_NAME -e GIT_BRANCH="$BRANCH_NAME" -e GIT_CHANGE_ID="$CHANGE_ID" -e VOLTO=$VOLTO plone/volto-addon-ci'''
+                  sh '''docker run --name="$BUILD_TAG-volto" --entrypoint=make --workdir=/app/src/addons/$GIT_NAME  $BUILD_TAG-frontend test-ci'''
                   sh '''rm -rf xunit-reports'''
                   sh '''mkdir -p xunit-reports'''
-                  sh '''docker cp $BUILD_TAG-volto:/opt/frontend/my-volto-project/coverage xunit-reports/'''
-                  sh '''docker cp $BUILD_TAG-volto:/opt/frontend/my-volto-project/junit.xml xunit-reports/'''
-                  sh '''docker cp $BUILD_TAG-volto:/opt/frontend/my-volto-project/unit_tests_log.txt xunit-reports/'''
+                  sh '''docker cp $BUILD_TAG-volto:/app/coverage xunit-reports/'''
+                  sh '''docker cp $BUILD_TAG-volto:/app/junit.xml xunit-reports/'''
                   stash name: "xunit-reports", includes: "xunit-reports/**"
-                  archiveArtifacts artifacts: "xunit-reports/unit_tests_log.txt", fingerprint: true
                   publishHTML (target : [
                     allowMissing: false,
                     alwaysLinkToLastBuild: true,
@@ -110,8 +122,6 @@ pipeline {
               }
             }
           }
-        )
-      }
     }
 
     stage('Integration tests') {
@@ -131,21 +141,18 @@ pipeline {
         }
       }
       steps {
-        parallel(
-
           "Cypress": {
-            node(label: 'docker') {
               script {
                 try {
-                  sh '''docker pull eeacms/plone-backend; docker run --rm -d --name="$BUILD_TAG-plone" -e SITE="Plone" -e PROFILES="eea.kitkat:testing eea.progress.editing:default" -e ADDONS="eea.progress.editing eea.progress.workflow" eeacms/plone-backend'''
-                  sh '''docker pull plone/volto-addon-ci; docker run -i --name="$BUILD_TAG-cypress" --link $BUILD_TAG-plone:plone -e NAMESPACE="$NAMESPACE" -e GIT_NAME=$GIT_NAME -e GIT_BRANCH="$BRANCH_NAME" -e GIT_CHANGE_ID="$CHANGE_ID" -e DEPENDENCIES="$DEPENDENCIES" -e VOLTO=$VOLTO plone/volto-addon-ci cypress'''
-                } finally {
+                  sh '''docker run --pull always --rm -d --name="$BUILD_TAG-plone" -e SITE="Plone" -e PROFILES="eea.kitkat:testing" eeacms/plone-backend'''
+                  sh '''docker run --link $BUILD_TAG-plone:plone --entrypoint=make --workdir=/app/src/addons/volto-banner -e "CI=true" -e "NODE_ENV=development" -e "RAZZLE_JEST_CONFIG=src/addons/volto-banner/jest-addon.config.js" -e "RAZZLE_INTERNAL_API_PATH=http://plone:8080/Plone" -e "RAZZLE_DEV_PROXY_API_PATH=http://plone:8080/Plone" -e "CYPRESS_API_PATH=http://plone:8080/Plone" -e "RAZZLE_API_PATH=http://plone:8080/Plone" $BUILD_TAG-frontend cypress-ci'''                
+                 } finally {
                   try {
                     sh '''rm -rf cypress-reports cypress-results cypress-coverage'''
                     sh '''mkdir -p cypress-reports cypress-results cypress-coverage'''
-                    sh '''docker cp $BUILD_TAG-cypress:/opt/frontend/my-volto-project/src/addons/$GIT_NAME/cypress/videos cypress-reports/'''
-                    sh '''docker cp $BUILD_TAG-cypress:/opt/frontend/my-volto-project/src/addons/$GIT_NAME/cypress/reports cypress-results/'''
-                    coverage = sh script: '''docker cp $BUILD_TAG-cypress:/opt/frontend/my-volto-project/src/addons/$GIT_NAME/coverage cypress-coverage/''', returnStatus: true
+                    sh '''docker cp $BUILD_TAG-cypress:/app/src/addons/$GIT_NAME/cypress/videos cypress-reports/'''
+                    sh '''docker cp $BUILD_TAG-cypress:/app/src/addons/$GIT_NAME/cypress/reports cypress-results/'''
+                    coverage = sh script: '''docker cp $BUILD_TAG-cypress:/app/src/addons/$GIT_NAME/coverage cypress-coverage/''', returnStatus: true
                     if ( coverage == 0 ) {
                          publishHTML (target : [allowMissing: false,
                              alwaysLinkToLastBuild: true,
@@ -169,11 +176,8 @@ pipeline {
 
                   }
                 }
-              }
             }
           }
-
-        )
       }
     }
 
@@ -260,8 +264,7 @@ pipeline {
                 error "Pipeline aborted due to PR not made from develop branch"
             }
            withCredentials([string(credentialsId: 'eea-jenkins-token', variable: 'GITHUB_TOKEN')]) {
-            sh '''docker pull eeacms/gitflow'''
-            sh '''docker run -i --rm --name="$BUILD_TAG-gitflow-pr" -e GIT_CHANGE_TARGET="$CHANGE_TARGET" -e GIT_CHANGE_BRANCH="$CHANGE_BRANCH" -e GIT_CHANGE_AUTHOR="$CHANGE_AUTHOR" -e GIT_CHANGE_TITLE="$CHANGE_TITLE" -e GIT_TOKEN="$GITHUB_TOKEN" -e GIT_BRANCH="$BRANCH_NAME" -e GIT_CHANGE_ID="$CHANGE_ID" -e GIT_ORG="$GIT_ORG" -e GIT_NAME="$GIT_NAME" -e LANGUAGE=javascript eeacms/gitflow'''
+            sh '''docker run --pull always -i --rm --name="$BUILD_TAG-gitflow-pr" -e GIT_CHANGE_TARGET="$CHANGE_TARGET" -e GIT_CHANGE_BRANCH="$CHANGE_BRANCH" -e GIT_CHANGE_AUTHOR="$CHANGE_AUTHOR" -e GIT_CHANGE_TITLE="$CHANGE_TITLE" -e GIT_TOKEN="$GITHUB_TOKEN" -e GIT_BRANCH="$BRANCH_NAME" -e GIT_CHANGE_ID="$CHANGE_ID" -e GIT_ORG="$GIT_ORG" -e GIT_NAME="$GIT_NAME" -e LANGUAGE=javascript eeacms/gitflow'''
            }
           }
         }
