@@ -55,15 +55,24 @@ pipeline {
      }
 
 
-    stage('Code') {
+    stage('Tests') {
       when {
-        allOf {
-          environment name: 'CHANGE_ID', value: ''
-          not { changelog '.*^Automated release [0-9\\.]+$' }
-          not { branch 'master' }
+        anyOf {
+          allOf {
+            not { environment name: 'CHANGE_ID', value: '' }
+            environment name: 'CHANGE_TARGET', value: 'develop'
+          }
+          allOf {
+            environment name: 'CHANGE_ID', value: ''
+            anyOf {
+              not { changelog '.*^Automated release [0-9\\.]+$' }
+              branch 'master'
+            }
+          }
         }
       }
       parallel {
+        stages {
           stage("ES lint") {
               steps {
                  sh '''docker run --rm --name="$BUILD_TAG-eslint" --entrypoint=make --workdir=/app/src/addons/$GIT_NAME  $BUILD_TAG-frontend lint'''
@@ -81,26 +90,9 @@ pipeline {
                  sh '''docker run --rm --name="$BUILD_TAG-prettier" --entrypoint=make --workdir=/app/src/addons/$GIT_NAME  $BUILD_TAG-frontend prettier'''
                }
           }
-      }
-    }
-
-    stage('Tests') {
-      when {
-        anyOf {
-          allOf {
-            not { environment name: 'CHANGE_ID', value: '' }
-            environment name: 'CHANGE_TARGET', value: 'develop'
-          }
-          allOf {
-            environment name: 'CHANGE_ID', value: ''
-            anyOf {
-              not { changelog '.*^Automated release [0-9\\.]+$' }
-              branch 'master'
-            }
-          }
-        }
-      }
-      steps {
+     
+          stage('Tests') {
+            steps {
               script {
                 try {
                   sh '''docker run --name="$BUILD_TAG-volto" --entrypoint=make --workdir=/app/src/addons/$GIT_NAME  $BUILD_TAG-frontend test-ci'''
@@ -126,24 +118,9 @@ pipeline {
                 }
               }
             }
-    }
-
-    stage('Integration tests') {
-      when {
-        anyOf {
-          allOf {
-            not { environment name: 'CHANGE_ID', value: '' }
-            environment name: 'CHANGE_TARGET', value: 'develop'
-          }
-          allOf {
-            environment name: 'CHANGE_ID', value: ''
-            anyOf {
-              not { changelog '.*^Automated release [0-9\\.]+$' }
-              branch 'master'
-            }
-          }
+         }
         }
-      }
+     stage('Integration tests') {
       steps {
               script {
                 try {
@@ -179,8 +156,9 @@ pipeline {
                   }
                 }
           }
-      }
-    }
+        }
+     }
+   }
 
     stage('Report to SonarQube') {
       when {
