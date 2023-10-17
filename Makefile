@@ -140,7 +140,6 @@ test-ci:
 .PHONY: start-ci
 start-ci:
 	cd ../..
-	yarn
 	yarn start &
 
 .PHONY: cypress-ci
