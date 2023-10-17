@@ -72,7 +72,6 @@ pipeline {
         }
       }
       parallel {
-        stages {
           stage("ES lint") {
               steps {
                  sh '''docker run --rm --name="$BUILD_TAG-eslint" --entrypoint=make --workdir=/app/src/addons/$GIT_NAME  $BUILD_TAG-frontend lint'''
@@ -158,7 +157,6 @@ pipeline {
           }
         }
      }
-   }
     }
     stage('Report to SonarQube') {
       when {
