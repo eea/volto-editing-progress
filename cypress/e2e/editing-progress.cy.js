@@ -50,8 +50,8 @@ describe('Editing progress', () => {
     cy.removeContentType('music');
   });
   it('should have background color', () => {
-    cy.get('#sidebar_Document').click({ force: true });
-    cy.get('#sidebar_Document').should(
+    cy.get('#sidebar_Collection').click({ force: true });
+    cy.get('#sidebar_Collection').should(
       'have.css',
       'background-color',
       'rgb(173, 216, 230)',
@@ -60,7 +60,7 @@ describe('Editing progress', () => {
   it('should change background color', () => {
     cy.get('#sidebar_music').click({ force: true });
     cy.waitForResourceToLoad('music');
-    cy.get('#sidebar_Document').should(
+    cy.get('#sidebar_Collection').should(
       'have.css',
       'background-color',
       'rgba(0, 0, 0, 0)',
@@ -83,7 +83,7 @@ describe('Editing progress', () => {
       .click({ force: true });
     cy.wait(100);
 
-    cy.get('#sidebar_Document').click({ force: true });
+    cy.get('#sidebar_Collection').click({ force: true });
     cy.wait(100);
     cy.get('#sidebar_music').should(
       'have.css',
@@ -104,7 +104,7 @@ describe('Editing progress', () => {
     cy.get("#property_content_name [role='combobox']")
       .find('a')
       .should('not.exist');
-    cy.get('#sidebar_Document').click({ force: true });
+    cy.get('#sidebar_Collection').click({ force: true });
     cy.wait(100);
     cy.get('#sidebar_music').should(
       'have.css',
