@@ -51,13 +51,21 @@ describe('Blocks Tests', () => {
     cy.get('#toolbar-save').click();
     cy.url().should('eq', Cypress.config().baseUrl + '/cypress/my-page');
 
+    cy.get('#toolbar-add').click();
+    cy.get('#toolbar-add-document').click();
+    cy.clearSlateTitle();
+    cy.getSlateTitle().type('Test Progress');
+    cy.get('.documentFirstHeading').contains('Test Progress');
+    cy.get('#toolbar-save').click();
+
     cy.get('#toolbar-personal').click();
     cy.contains('Site Setup').click();
 
     cy.contains('Editing Progress').click();
+    cy.contains('Edit JSON').click();
 
-    cy.get('#field-progress').should('be.visible');
-    cy.get('#field-progress')
+    cy.get('#field-json').should('be.visible');
+    cy.get('#field-json')
       .should('be.visible')
       .should('be.enabled')
       .dblclick()
@@ -65,14 +73,17 @@ describe('Blocks Tests', () => {
       .click()
       .type('{enter}');
 
-    cy.get('#field-progress').should('be.visible');
-    cy.get('#field-progress')
+    cy.get('#field-json').should('be.visible');
+    cy.get('#field-json')
       .should('be.visible')
       .should('be.enabled')
-      .dblclick()
-      .invoke('val', documentStep)
-      .click()
-      .type('{enter}');
+      .type('{ctrl}', { release: false });
+
+    cy.get('#field-json').trigger('keydown', { keyCode: 65, which: 65 });
+
+    cy.get('#field-json').invoke('val', documentStep).type('{enter}');
+
+    cy.get('.actions .ui.basic.circular.primary.right.floated.button').click();
 
     cy.get('#toolbar-save').click();
 
@@ -119,7 +130,7 @@ describe('Blocks Tests', () => {
 
     cy.get('#toolbar-save').click();
 
-    cy.navigate('/cypress/my-page');
+    cy.navigate('/cypress/my-page/test-progress');
 
     cy.get('#toolbar-cut-blocks').should('be.visible');
     cy.get('#toolbar-cut-blocks').click();
@@ -136,17 +147,27 @@ describe('Blocks Tests', () => {
     cy.get('.field-wrapper-test_progress_2 div[role="textbox"] p').type('test');
 
     cy.get('#toolbar-save').click();
-    cy.url().should('eq', Cypress.config().baseUrl + '/cypress/my-page');
+    cy.url().should(
+      'eq',
+      Cypress.config().baseUrl + '/cypress/my-page/test-progress',
+    );
 
     cy.get('#toolbar-personal').click();
     cy.contains('Site Setup').click();
 
     cy.contains('Editing Progress').click();
-    cy.get('#field-progress')
-      .dblclick()
-      .invoke('val', `{}`)
-      .click()
-      .type('{enter}');
+    cy.contains('Edit JSON').click();
+    cy.get('#field-json').should('be.visible');
+    cy.get('#field-json')
+      .should('be.visible')
+      .should('be.enabled')
+      .type('{ctrl}', { release: false });
+
+    cy.get('#field-json').trigger('keydown', { keyCode: 65, which: 65 });
+
+    cy.get('#field-json').invoke('val', '{}').click().type('{enter}');
+
+    cy.get('.actions .ui.basic.circular.primary.right.floated.button').click();
 
     cy.get('#toolbar-save').click();
     cy.navigate('/cypress/my-page');
