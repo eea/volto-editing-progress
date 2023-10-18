@@ -101,7 +101,6 @@ pipeline {
                   sh '''mkdir -p xunit-reports'''
                   sh '''docker cp $BUILD_TAG-volto:/app/coverage xunit-reports/'''
                   sh '''docker cp $BUILD_TAG-volto:/app/junit.xml xunit-reports/'''
-                  stash name: "xunit-reports", includes: "xunit-reports/**"
                   publishHTML (target : [
                     allowMissing: false,
                     alwaysLinkToLastBuild: true,
@@ -144,7 +143,6 @@ pipeline {
                     }
                     sh '''touch empty_file; for ok_test in $(grep -E 'file=.*failures="0"' $(grep 'testsuites .*failures="0"' $(find cypress-results -name *.xml) empty_file | awk -F: '{print $1}') empty_file | sed 's/.* file="\\(.*\\)" time.*/\\1/' | sed 's#^cypress/integration/##g' | sed 's#^../../../node_modules/@eeacms/##g'); do rm -f cypress-reports/videos/$ok_test.mp4; rm -f cypress-reports/$ok_test.mp4; done'''
                     archiveArtifacts artifacts: 'cypress-reports/**/*.mp4', fingerprint: true, allowEmptyArchive: true
-                    stash name: "cypress-coverage", includes: "cypress-coverage/**", allowEmpty: true
                   }
                   finally {
                     catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') {
@@ -161,6 +159,11 @@ pipeline {
     }
          }
       }
+  	post {
+    	   always {
+        	sh script: "docker rmi $BUILD_TAG-frontend", returnStatus: true
+           }
+    	}
     }
     stage('Report to SonarQube') {
       when {
@@ -182,21 +185,16 @@ pipeline {
         }
       }
       steps {
-        node(label: 'swarm') {
           script{
-            checkout scm
-            unstash "xunit-reports"
-            unstash "cypress-coverage"
             def scannerHome = tool 'SonarQubeScanner';
             def nodeJS = tool 'NodeJS';
             withSonarQubeEnv('Sonarqube') {
-              sh '''sed -i "s#/opt/frontend/my-volto-project/src/addons/${GIT_NAME}/##g" xunit-reports/coverage/lcov.info'''
+              sh '''sed -i "s#/app/src/addons/${GIT_NAME}/##g" xunit-reports/coverage/lcov.info'''
               sh '''sed -i "s#src/addons/${GIT_NAME}/##g" xunit-reports/coverage/lcov.info'''
               sh "export PATH=${scannerHome}/bin:${nodeJS}/bin:$PATH; sonar-scanner -Dsonar.javascript.lcov.reportPaths=./xunit-reports/coverage/lcov.info,./cypress-coverage/coverage/lcov.info -Dsonar.sources=./src -Dsonar.projectKey=$GIT_NAME-$BRANCH_NAME -Dsonar.projectVersion=$BRANCH_NAME-$BUILD_NUMBER"
-              sh '''try=2; while [ \$try -gt 0 ]; do curl -s -XPOST -u "${SONAR_AUTH_TOKEN}:" "${SONAR_HOST_URL}api/project_tags/set?project=${GIT_NAME}-${BRANCH_NAME}&tags=${SONARQUBE_TAGS},${BRANCH_NAME}" > set_tags_result; if [ \$(grep -ic error set_tags_result ) -eq 0 ]; then try=0; else cat set_tags_result; echo "... Will retry"; sleep 60; try=\$(( \$try - 1 )); fi; done'''
+              sh '''try=5; while [ \$try -gt 0 ]; do curl -s -XPOST -u "${SONAR_AUTH_TOKEN}:" "${SONAR_HOST_URL}api/project_tags/set?project=${GIT_NAME}-${BRANCH_NAME}&tags=${SONARQUBE_TAGS},${BRANCH_NAME}" > set_tags_result; if [ \$(grep -ic error set_tags_result ) -eq 0 ]; then try=0; else cat set_tags_result; echo "... Will retry"; sleep 15; try=\$(( \$try - 1 )); fi; done'''
             }
           }
-        }
       }
     }
 
@@ -215,7 +213,6 @@ pipeline {
         }
       }
       steps {
-        node(label: 'docker') {
           script {
             sh '''docker pull eeacms/gitflow'''
             sh '''echo "Error" > checkresult.txt'''
@@ -226,7 +223,6 @@ pipeline {
             publishChecks name: 'SonarQube', title: 'Sonarqube Code Quality Check', summary: "Quality check on the SonarQube metrics from branch develop, comparing it with the ones from master branch. No bugs are allowed",
                           text: readFile(file: 'checkresult.txt'), conclusion: "${currentBuild.currentResult}",
                           detailsURL: "${env.BUILD_URL}display/redirect"
-          }
         }
       }
     }
@@ -239,7 +235,6 @@ pipeline {
         environment name: 'CHANGE_TARGET', value: 'master'
       }
       steps {
-        node(label: 'docker') {
           script {
             if ( env.CHANGE_BRANCH != "develop" ) {
                 error "Pipeline aborted due to PR not made from develop branch"
@@ -248,7 +243,6 @@ pipeline {
             sh '''docker run --pull always -i --rm --name="$BUILD_TAG-gitflow-pr" -e GIT_CHANGE_TARGET="$CHANGE_TARGET" -e GIT_CHANGE_BRANCH="$CHANGE_BRANCH" -e GIT_CHANGE_AUTHOR="$CHANGE_AUTHOR" -e GIT_CHANGE_TITLE="$CHANGE_TITLE" -e GIT_TOKEN="$GITHUB_TOKEN" -e GIT_BRANCH="$BRANCH_NAME" -e GIT_CHANGE_ID="$CHANGE_ID" -e GIT_ORG="$GIT_ORG" -e GIT_NAME="$GIT_NAME" -e LANGUAGE=javascript eeacms/gitflow'''
            }
           }
-        }
       }
     }
 
