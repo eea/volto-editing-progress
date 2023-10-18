@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Plone\n"
-"POT-Creation-Date: 2023-08-29T17:51:21.719Z\n"
+"POT-Creation-Date: 2023-09-14T13:45:52.728Z\n"
 "Last-Translator: Plone i18n <plone-i18n@lists.sourceforge.net>\n"
 "Language-Team: Plone i18n <plone-i18n@lists.sourceforge.net>\n"
 "MIME-Version: 1.0\n"
@@ -12,6 +12,16 @@ msgstr ""
 "Language-Name: English\n"
 "Preferred-Encodings: utf-8\n"
 "Domain: volto\n"
+
+#: VisualJSONWidget
+# defaultMessage: Edit JSON
+msgid "Edit JSON"
+msgstr ""
+
+#: schema
+# defaultMessage: JSON code
+msgid "JSON code"
+msgstr ""
 
 #: TextareaJSONWidget
 # defaultMessage: Please enter valid JSON!

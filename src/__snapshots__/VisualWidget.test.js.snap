@@ -1,0 +1,76 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Visual widget renders the VisualJSONWidget component without breaking if props and progressEditing are empty 1`] = `
+Array [
+  <div>
+    <div
+      className="ui container"
+    >
+      <button
+        className="ui grey button"
+        id="json_button"
+        onClick={[Function]}
+      >
+        Edit JSON
+      </button>
+    </div>
+    <div
+      className="ui divider"
+    />
+  </div>,
+  <div
+    className="ui segment pushable"
+    style={
+      Object {
+        "height": "750px",
+      }
+    }
+  >
+    <div
+      className="ui big divided selection relaxed list ui push left visible sidebar"
+      icon="labeled"
+      role="list"
+      style={
+        Object {
+          "width": "250px",
+        }
+      }
+    >
+      <input
+        onChange={[Function]}
+        placeholder="Search... "
+        style={
+          Object {
+            "paddingLeft": " 10px",
+          }
+        }
+        value=""
+      />
+    </div>
+    <div
+      className="pusher"
+      style={
+        Object {
+          "width": "calc(100% - 250px)",
+        }
+      }
+    >
+      <div
+        className="ui segment"
+        style={
+          Object {
+            "maxHeight": "750px",
+            "overflow": "",
+            "paddingBottom": "",
+            "width": "100%",
+          }
+        }
+      >
+        <div
+          className="accordion ui fluid styled"
+        />
+      </div>
+    </div>
+  </div>,
+]
+`;

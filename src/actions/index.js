@@ -1,5 +1,4 @@
-import { EDITING_PROGRESS } from '@eeacms/volto-editing-progress/actionTypes';
-
+import { EDITING_PROGRESS, GET_RAW_CONTENT } from '../actionTypes';
 /**
  * getEditingProgress function.
  * @function getEditingProgress
@@ -16,5 +15,16 @@ export function getEditingProgress(item) {
         Accept: 'application/json',
       },
     },
+  };
+}
+export function getRawContent(url, headers = {}) {
+  return {
+    type: GET_RAW_CONTENT,
+    request: {
+      op: 'get',
+      path: url,
+      headers,
+    },
+    url,
   };
 }
