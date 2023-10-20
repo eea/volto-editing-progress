@@ -92,8 +92,6 @@ pipeline {
                }
           }
         
-         stage('Coverage Tests') {
-           parallel {
               stage('Unit tests') {
               steps {
                 script {
@@ -119,8 +117,8 @@ pipeline {
                    sh script: '''docker rm -v $BUILD_TAG-volto''', returnStatus: true
                 }
               }
-            }
          }
+         } 
        stage('Integration tests') {
          steps {
               script {
@@ -158,8 +156,8 @@ pipeline {
           }
         }
      }
-    }
-         }
+    
+         
       }
   	post {
     	   always {
