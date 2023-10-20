@@ -12,6 +12,7 @@ pipeline {
         BACKEND_PROFILES = "eea.kitkat:testing eea.progress.editing:default"
         BACKEND_ADDONS = "eea.progress.editing eea.progress.workflow"
         VOLTO = "16"
+        IMAGE_NAME = BUILD_TAG.toLowerCase()
   }
 
   stages {
@@ -27,7 +28,7 @@ pipeline {
         node(label: 'docker') {
           withCredentials([string(credentialsId: 'eea-jenkins-token', variable: 'GITHUB_TOKEN'),string(credentialsId: 'eea-jenkins-npm-token', variable: 'NPM_TOKEN')]) {
             sh '''docker pull eeacms/gitflow'''
-            sh '''docker run -i --rm --name="$BUILD_TAG-gitflow-master" -e GIT_BRANCH="$BRANCH_NAME" -e GIT_NAME="$GIT_NAME" -e GIT_TOKEN="$GITHUB_TOKEN" -e NPM_TOKEN="$NPM_TOKEN" -e LANGUAGE=javascript eeacms/gitflow'''
+            sh '''docker run -i --rm --name="$IMAGE_NAME-gitflow-master" -e GIT_BRANCH="$BRANCH_NAME" -e GIT_NAME="$GIT_NAME" -e GIT_TOKEN="$GITHUB_TOKEN" -e NPM_TOKEN="$NPM_TOKEN" -e LANGUAGE=javascript eeacms/gitflow'''
           }
         }
       }
@@ -52,7 +53,7 @@ pipeline {
       }
       steps {
         checkout scm
-        sh '''docker build --build-arg="VOLTO_VERSION=$VOLTO" --build-arg="ADDON_NAME=$NAMESPACE/$GIT_NAME"  --build-arg="ADDON_PATH=$GIT_NAME" . -t $BUILD_TAG-frontend'''
+        sh '''docker build --build-arg="VOLTO_VERSION=$VOLTO" --build-arg="ADDON_NAME=$NAMESPACE/$GIT_NAME"  --build-arg="ADDON_PATH=$GIT_NAME" . -t $IMAGE_NAME-frontend'''
       }
      }
 
@@ -76,19 +77,19 @@ pipeline {
       stages {
           stage("ES lint") {
               steps {
-                 sh '''docker run --rm --name="$BUILD_TAG-eslint" --entrypoint=make --workdir=/app/src/addons/$GIT_NAME  $BUILD_TAG-frontend lint'''
+                 sh '''docker run --rm --name="$IMAGE_NAME-eslint" --entrypoint=make --workdir=/app/src/addons/$GIT_NAME  $IMAGE_NAME-frontend lint'''
               }
            }
 
           stage("Style lint") {
                steps {
-                 sh '''docker run --rm --name="$BUILD_TAG-stylelint" --entrypoint=make --workdir=/app/src/addons/$GIT_NAME  $BUILD_TAG-frontend stylelint'''
+                 sh '''docker run --rm --name="$IMAGE_NAME-stylelint" --entrypoint=make --workdir=/app/src/addons/$GIT_NAME  $IMAGE_NAME-frontend stylelint'''
                }
           }
 
           stage ("Prettier") {
                steps{
-                 sh '''docker run --rm --name="$BUILD_TAG-prettier" --entrypoint=make --workdir=/app/src/addons/$GIT_NAME  $BUILD_TAG-frontend prettier'''
+                 sh '''docker run --rm --name="$IMAGE_NAME-prettier" --entrypoint=make --workdir=/app/src/addons/$GIT_NAME  $IMAGE_NAME-frontend prettier'''
                }
           }
         
@@ -98,11 +99,11 @@ pipeline {
               steps {
                 script {
                   try {
-                  sh '''docker run --name="$BUILD_TAG-volto" --entrypoint=make --workdir=/app/src/addons/$GIT_NAME  $BUILD_TAG-frontend test-ci'''
+                  sh '''docker run --name="$IMAGE_NAME-volto" --entrypoint=make --workdir=/app/src/addons/$GIT_NAME  $IMAGE_NAME-frontend test-ci'''
                   sh '''rm -rf xunit-reports'''
                   sh '''mkdir -p xunit-reports'''
-                  sh '''docker cp $BUILD_TAG-volto:/app/coverage xunit-reports/'''
-                  sh '''docker cp $BUILD_TAG-volto:/app/junit.xml xunit-reports/'''
+                  sh '''docker cp $IMAGE_NAME-volto:/app/coverage xunit-reports/'''
+                  sh '''docker cp $IMAGE_NAME-volto:/app/junit.xml xunit-reports/'''
                   publishHTML (target : [
                     allowMissing: false,
                     alwaysLinkToLastBuild: true,
@@ -116,7 +117,7 @@ pipeline {
                     catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') {
                         junit testResults: 'xunit-reports/junit.xml', allowEmptyResults: true
                     }
-                   sh script: '''docker rm -v $BUILD_TAG-volto''', returnStatus: true
+                   sh script: '''docker rm -v $IMAGE_NAME-volto''', returnStatus: true
                 }
               }
             }
@@ -125,18 +126,18 @@ pipeline {
          steps {
               script {
                 try {
-                  sh '''docker run --pull always --rm -d --name="$BUILD_TAG-plone" -e SITE="Plone" -e PROFILES="$BACKEND_PROFILES" -e ADDONS="$BACKEND_ADDONS" eeacms/plone-backend'''
-                  sh '''docker run --link $BUILD_TAG-plone:plone --entrypoint=make --name="$BUILD_TAG-cypress" --workdir=/app/src/addons/${GIT_NAME} -e "RAZZLE_INTERNAL_API_PATH=http://plone:8080/Plone" $BUILD_TAG-frontend cypress-ci'''                
+                  sh '''docker run --pull always --rm -d --name="$IMAGE_NAME-plone" -e SITE="Plone" -e PROFILES="$BACKEND_PROFILES" -e ADDONS="$BACKEND_ADDONS" eeacms/plone-backend'''
+                  sh '''docker run --link $IMAGE_NAME-plone:plone --entrypoint=make --name="$IMAGE_NAME-cypress" --workdir=/app/src/addons/${GIT_NAME} -e "RAZZLE_INTERNAL_API_PATH=http://plone:8080/Plone" $IMAGE_NAME-frontend cypress-ci'''                
                  } finally {
                   try {
                     sh '''rm -rf cypress-reports cypress-results cypress-coverage'''
                     sh '''mkdir -p cypress-reports cypress-results cypress-coverage'''
-                    sh '''docker cp $BUILD_TAG-cypress:/app/src/addons/$GIT_NAME/cypress/videos cypress-reports/'''
-                    sh '''docker cp $BUILD_TAG-cypress:/app/src/addons/$GIT_NAME/cypress/reports cypress-results/'''
+                    sh '''docker cp $IMAGE_NAME-cypress:/app/src/addons/$GIT_NAME/cypress/videos cypress-reports/'''
+                    sh '''docker cp $IMAGE_NAME-cypress:/app/src/addons/$GIT_NAME/cypress/reports cypress-results/'''
  
-                   archiveArtifacts artifacts: 'cypress-reports/**/*.xml', fingerprint: true, allowEmptyArchive: true
+                    coverage = sh script: '''docker cp $IMAGE_NAME-cypress:/app/src/addons/$GIT_NAME/cypress/coverage cypress-coverage/''', returnStatus: true
+                    archiveArtifacts artifacts: '**/*.xml', fingerprint: true, allowEmptyArchive: true
 
-                    coverage = sh script: '''docker cp $BUILD_TAG-cypress:/app/src/addons/$GIT_NAME/coverage cypress-coverage/''', returnStatus: true
                     if ( coverage == 0 ) {
                          sh '''ls -ltr cypress-coverage/*'''
                          sh '''ls -ltr cypress-coverage/coverage/*'''
@@ -156,9 +157,9 @@ pipeline {
                     catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') {
                         junit testResults: 'cypress-results/**/*.xml', allowEmptyResults: true
                     }
-                    sh script: "docker stop $BUILD_TAG-plone", returnStatus: true
-                    sh script: "docker rm -v $BUILD_TAG-plone", returnStatus: true
-                    sh script: "docker rm -v $BUILD_TAG-cypress", returnStatus: true
+                    sh script: "docker stop $IMAGE_NAME-plone", returnStatus: true
+                    sh script: "docker rm -v $IMAGE_NAME-plone", returnStatus: true
+                    sh script: "docker rm -v $IMAGE_NAME-cypress", returnStatus: true
                   }
                 }
           }
@@ -169,7 +170,7 @@ pipeline {
       }
   	post {
     	   always {
-        	sh script: "docker rmi $BUILD_TAG-frontend", returnStatus: true
+        	sh script: "docker rmi $IMAGE_NAME-frontend", returnStatus: true
            }
     	}
     }
@@ -227,7 +228,7 @@ pipeline {
             sh '''docker pull eeacms/gitflow'''
             sh '''echo "Error" > checkresult.txt'''
             catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
-               sh '''set -o pipefail; docker run -i --rm --name="$BUILD_TAG-gitflow-sn" -e GIT_BRANCH="$BRANCH_NAME" -e GIT_NAME="$GIT_NAME" eeacms/gitflow /checkSonarqubemaster.sh | grep -v "Found script" | tee checkresult.txt'''
+               sh '''set -o pipefail; docker run -i --rm --name="$IMAGE_NAME-gitflow-sn" -e GIT_BRANCH="$BRANCH_NAME" -e GIT_NAME="$GIT_NAME" eeacms/gitflow /checkSonarqubemaster.sh | grep -v "Found script" | tee checkresult.txt'''
              }
 
             publishChecks name: 'SonarQube', title: 'Sonarqube Code Quality Check', summary: "Quality check on the SonarQube metrics from branch develop, comparing it with the ones from master branch. No bugs are allowed",
@@ -250,7 +251,7 @@ pipeline {
                 error "Pipeline aborted due to PR not made from develop branch"
             }
            withCredentials([string(credentialsId: 'eea-jenkins-token', variable: 'GITHUB_TOKEN')]) {
-            sh '''docker run --pull always -i --rm --name="$BUILD_TAG-gitflow-pr" -e GIT_CHANGE_TARGET="$CHANGE_TARGET" -e GIT_CHANGE_BRANCH="$CHANGE_BRANCH" -e GIT_CHANGE_AUTHOR="$CHANGE_AUTHOR" -e GIT_CHANGE_TITLE="$CHANGE_TITLE" -e GIT_TOKEN="$GITHUB_TOKEN" -e GIT_BRANCH="$BRANCH_NAME" -e GIT_CHANGE_ID="$CHANGE_ID" -e GIT_ORG="$GIT_ORG" -e GIT_NAME="$GIT_NAME" -e LANGUAGE=javascript eeacms/gitflow'''
+            sh '''docker run --pull always -i --rm --name="$IMAGE_NAME-gitflow-pr" -e GIT_CHANGE_TARGET="$CHANGE_TARGET" -e GIT_CHANGE_BRANCH="$CHANGE_BRANCH" -e GIT_CHANGE_AUTHOR="$CHANGE_AUTHOR" -e GIT_CHANGE_TITLE="$CHANGE_TITLE" -e GIT_TOKEN="$GITHUB_TOKEN" -e GIT_BRANCH="$BRANCH_NAME" -e GIT_CHANGE_ID="$CHANGE_ID" -e GIT_ORG="$GIT_ORG" -e GIT_NAME="$GIT_NAME" -e LANGUAGE=javascript eeacms/gitflow'''
            }
           }
       }

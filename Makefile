@@ -50,6 +50,10 @@ VOLTO_VERSION?=16
 ADDON_PATH="${DIR}"
 ADDON_NAME="@eeacms/${ADDON_PATH}"
 DOCKER_COMPOSE=PLONE_VERSION=${PLONE_VERSION} VOLTO_VERSION=${VOLTO_VERSION} ADDON_NAME=${ADDON_NAME} ADDON_PATH=${ADDON_PATH} docker compose
+RAZZLE_DEV_PROXY_API_PATH?="${RAZZLE_INTERNAL_API_PATH}"
+CYPRESS_API_PATH="${RAZZLE_DEV_PROXY_API_PATH}"
+
+
 
 # Top-level targets
 .PHONY: all
@@ -133,9 +137,8 @@ help:                   ## Show this help.
 
 .PHONY: test-ci
 test-ci:
-	cp jest-addon.config.js /app
 	cd /app
-	RAZZLE_JEST_CONFIG=jest-addon.config.js CI=true yarn test src/addons/${ADDON_PATH}/src --watchAll=false --reporters=default --reporters=jest-junit --collectCoverage --coverageReporters lcov cobertura text
+	RAZZLE_JEST_CONFIG=src/addons/${ADDON_PATH}/jest-addon.config.js CI=true yarn test src/addons/${ADDON_PATH}/src --watchAll=false --reporters=default --reporters=jest-junit --collectCoverage --coverageReporters lcov cobertura text
 
 .PHONY: start-ci
 start-ci:
@@ -147,6 +150,6 @@ cypress-ci:
 	cp .coverage.babel.config.js ../../babel.config.js
 	make start-ci
 	$(NODE_MODULES)/.bin/wait-on -t 240000  http://localhost:3000
-	make cypress-run
+	NODE_ENV=development make cypress-run
 
 
