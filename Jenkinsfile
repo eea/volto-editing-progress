@@ -130,14 +130,15 @@ pipeline {
                   sh '''docker run --link $IMAGE_NAME-plone:plone --entrypoint=make --name="$IMAGE_NAME-cypress" --workdir=/app/src/addons/${GIT_NAME} -e "RAZZLE_INTERNAL_API_PATH=http://plone:8080/Plone" $IMAGE_NAME-frontend cypress-ci'''                
                  } finally {
                   try {
-                    sh '''rm -rf cypress-reports cypress-results cypress-coverage'''
-                    sh '''mkdir -p cypress-reports cypress-results cypress-coverage'''
+                    sh '''rm -rf cypress-reports cypress-results cypress-coverage cypress-screenshots'''
+                    sh '''mkdir -p cypress-reports cypress-results cypress-coverage cypress-screenshots'''
                     sh '''docker cp $IMAGE_NAME-cypress:/app/src/addons/$GIT_NAME/cypress/videos cypress-reports/'''
                     sh '''docker cp $IMAGE_NAME-cypress:/app/src/addons/$GIT_NAME/cypress/reports cypress-results/'''
-                    sh '''docker cp $IMAGE_NAME-cypress:/app/src/addons/$GIT_NAME/cypress something/'''
-                    sh '''ls -ltr something/*''' 
-                    coverage = sh script: '''docker cp $IMAGE_NAME-cypress:/app/src/addons/$GIT_NAME/cypress/coverage cypress-coverage/''', returnStatus: true
-                    archiveArtifacts artifacts: '**/*.xml', fingerprint: true, allowEmptyArchive: true
+                    screenshots = sh script: '''docker cp $IMAGE_NAME-cypress:/app/src/addons/$GIT_NAME/cypress/screenshots cypress-screenshots/''', returnStatus: true
+
+                    archiveArtifacts artifacts: 'cypress-screenshots/**', fingerprint: true, allowEmptyArchive: true
+                    
+                    coverage = sh script: '''docker cp $IMAGE_NAME-cypress:/app/src/addons/$GIT_NAME/coverage cypress-coverage''', returnStatus: true
 
                     if ( coverage == 0 ) {
                          sh '''ls -ltr cypress-coverage/*'''
@@ -145,13 +146,14 @@ pipeline {
                          publishHTML (target : [allowMissing: false,
                              alwaysLinkToLastBuild: true,
                              keepAll: true,
-                             reportDir: 'cypress-coverage/coverage/lcov-report',
+                             reportDir: 'cypress-coverage/lcov-report',
                              reportFiles: 'index.html',
                              reportName: 'CypressCoverage',
                              reportTitles: 'Integration Tests Code Coverage'])
                     }
 
                     sh '''touch empty_file; for ok_test in $(grep -E 'file=.*failures="0"' $(grep 'testsuites .*failures="0"' $(find cypress-results -name *.xml) empty_file | awk -F: '{print $1}') empty_file | sed 's#.* file=".*\\/\\(.*\\.[jsxt]\\+\\)" time.*#\\1#' ); do rm -f cypress-reports/videos/$ok_test.mp4; rm -f cypress-reports/$ok_test.mp4; done'''
+
                     archiveArtifacts artifacts: 'cypress-reports/**/*.mp4', fingerprint: true, allowEmptyArchive: true
                   }
                   finally {
