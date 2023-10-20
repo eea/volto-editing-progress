@@ -50,6 +50,7 @@ VOLTO_VERSION?=16
 ADDON_PATH="${DIR}"
 ADDON_NAME="@eeacms/${ADDON_PATH}"
 DOCKER_COMPOSE=PLONE_VERSION=${PLONE_VERSION} VOLTO_VERSION=${VOLTO_VERSION} ADDON_NAME=${ADDON_NAME} ADDON_PATH=${ADDON_PATH} docker compose
+RAZZLE_INTERNAL_API_PATH?="${RAZZLE_DEV_PROXY_API_PATH}"
 RAZZLE_DEV_PROXY_API_PATH?="${RAZZLE_INTERNAL_API_PATH}"
 CYPRESS_API_PATH="${RAZZLE_DEV_PROXY_API_PATH}"
 
@@ -81,11 +82,11 @@ shell:			## Start a shell in the frontend container
 
 .PHONY: cypress-open
 cypress-open:		## Open cypress integration tests
-	NODE_ENV=development  $(NODE_MODULES)/cypress/bin/cypress open
+	CYPRESS_API_PATH="${RAZZLE_DEV_PROXY_API_PATH}" NODE_ENV=development  $(NODE_MODULES)/cypress/bin/cypress open
 
 .PHONY: cypress-run
 cypress-run:	## Run cypress integration tests
-	NODE_ENV=development  $(NODE_MODULES)/cypress/bin/cypress run
+	CYPRESS_API_PATH="${RAZZLE_DEV_PROXY_API_PATH}" NODE_ENV=development  $(NODE_MODULES)/cypress/bin/cypress run
 
 .PHONY: test
 test:			## Run jest tests
