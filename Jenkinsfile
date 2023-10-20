@@ -9,6 +9,8 @@ pipeline {
         NAMESPACE = "@eeacms"
         SONARQUBE_TAGS = "volto.eea.europa.eu,www.eea.europa.eu-ims,climate-energy.eea.europa.eu,demo-www.eea.europa.eu,www.eea.europa.eu-en,climate-adapt.eea.europa.eu"
         DEPENDENCIES = ""
+        BACKEND_PROFILES = "eea.kitkat:testing eea.progress.editing:default"
+        BACKEND_ADDONS = "eea.progress.editing eea.progress.workflow"
         VOLTO = "16"
   }
 
@@ -123,7 +125,7 @@ pipeline {
          steps {
               script {
                 try {
-                  sh '''docker run --pull always --rm -d --name="$BUILD_TAG-plone" -e SITE="Plone" -e PROFILES="eea.kitkat:testing" eeacms/plone-backend'''
+                  sh '''docker run --pull always --rm -d --name="$BUILD_TAG-plone" -e SITE="Plone" -e PROFILES="$BACKEND_PROFILES" -e ADDONS="$BACKEND_ADDONS" eeacms/plone-backend'''
                   sh '''docker run --link $BUILD_TAG-plone:plone --entrypoint=make --name="$BUILD_TAG-cypress" --workdir=/app/src/addons/${GIT_NAME} -e "CI=true" -e "NODE_ENV=development" -e "RAZZLE_JEST_CONFIG=src/addons/${GIT_NAME}/jest-addon.config.js" -e "RAZZLE_INTERNAL_API_PATH=http://plone:8080/Plone" -e "RAZZLE_DEV_PROXY_API_PATH=http://plone:8080/Plone" -e "CYPRESS_API_PATH=http://plone:8080/Plone" -e "RAZZLE_API_PATH=http://plone:8080/Plone" $BUILD_TAG-frontend cypress-ci'''                
                  } finally {
                   try {
