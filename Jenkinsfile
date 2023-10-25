@@ -132,7 +132,7 @@ pipeline {
                   try {
                     sh '''rm -rf cypress-videos cypress-results cypress-coverage cypress-screenshots'''
                     sh '''mkdir -p cypress-videos cypress-results cypress-coverage cypress-screenshots'''
-                    sh '''docker cp $IMAGE_NAME-cypress:/app/src/addons/$GIT_NAME/cypress/videos cypress-videos'''
+                    sh '''docker cp $IMAGE_NAME-cypress:/app/src/addons/$GIT_NAME/cypress/videos cypress-videos/'''
                     sh '''docker cp $IMAGE_NAME-cypress:/app/src/addons/$GIT_NAME/cypress/reports cypress-results/'''
                     screenshots = sh script: '''docker cp $IMAGE_NAME-cypress:/app/src/addons/$GIT_NAME/cypress/screenshots cypress-screenshots''', returnStatus: true
 
@@ -141,15 +141,16 @@ pipeline {
                     coverage = sh script: '''docker cp $IMAGE_NAME-cypress:/app/src/addons/$GIT_NAME/coverage cypress-coverage''', returnStatus: true
 
                     if ( coverage == 0 ) {
+                         sh '''
                          publishHTML (target : [allowMissing: false,
                              alwaysLinkToLastBuild: true,
                              keepAll: true,
-                             reportDir: 'cypress-coverage/lcov-report',
+                             reportDir: 'cypress-coverage/coverage/lcov-report',
                              reportFiles: 'index.html',
                              reportName: 'CypressCoverage',
                              reportTitles: 'Integration Tests Code Coverage'])
                     }
-                    sh '''for file in $(find cypress-results -name *.xml); do if [ $(grep -E 'failures="[1-9].*"' $file | wc -l) -eq 0 ]; then testname=$(grep -E 'file=.*failures="0"' $file | sed 's#.* file=".*\\/\\(.*\\.[jsxt]\\+\\)" time.*#\\1#' );  rm -f cypress-videos/$testname.mp4; fi; done'''
+                    sh '''for file in $(find cypress-results -name *.xml); do if [ $(grep -E 'failures="[1-9].*"' $file | wc -l) -eq 0 ]; then testname=$(grep -E 'file=.*failures="0"' $file | sed 's#.* file=".*\\/\\(.*\\.[jsxt]\\+\\)" time.*#\\1#' );  rm -f cypress-videos/videos/$testname.mp4; fi; done'''
                     archiveArtifacts artifacts: 'cypress-videos/**', fingerprint: true, allowEmptyArchive: true
                   }
                   finally {
@@ -200,8 +201,8 @@ pipeline {
               sh '''sed -i "s#/app/src/addons/${GIT_NAME}/##g" xunit-reports/coverage/lcov.info'''
               sh '''sed -i "s#src/addons/${GIT_NAME}/##g" xunit-reports/coverage/lcov.info'''
               sh '''cat xunit-reports/coverage/lcov.info'''
-              sh '''cat cypress-coverage/lcov.info'''
-              sh "export PATH=${scannerHome}/bin:${nodeJS}/bin:$PATH; sonar-scanner -Dsonar.javascript.lcov.reportPaths=./xunit-reports/coverage/lcov.info,./cypress-coverage/lcov.info -Dsonar.sources=./src -Dsonar.projectKey=$GIT_NAME-$BRANCH_NAME -Dsonar.projectVersion=$BRANCH_NAME-$BUILD_NUMBER"
+              sh '''cat cypress-coverage/coverage/lcov.info'''
+              sh "export PATH=${scannerHome}/bin:${nodeJS}/bin:$PATH; sonar-scanner -Dsonar.javascript.lcov.reportPaths=./xunit-reports/coverage/lcov.info,./cypress-coverage/coverage/lcov.info -Dsonar.sources=./src -Dsonar.projectKey=$GIT_NAME-$BRANCH_NAME -Dsonar.projectVersion=$BRANCH_NAME-$BUILD_NUMBER"
               sh '''try=5; while [ \$try -gt 0 ]; do curl -s -XPOST -u "${SONAR_AUTH_TOKEN}:" "${SONAR_HOST_URL}api/project_tags/set?project=${GIT_NAME}-${BRANCH_NAME}&tags=${SONARQUBE_TAGS},${BRANCH_NAME}" > set_tags_result; if [ \$(grep -ic error set_tags_result ) -eq 0 ]; then try=0; else cat set_tags_result; echo "... Will retry"; sleep 15; try=\$(( \$try - 1 )); fi; done'''
             }
           }
