@@ -13,7 +13,6 @@ pipeline {
         BACKEND_ADDONS = "eea.progress.editing eea.progress.workflow"
         VOLTO = "16"
         IMAGE_NAME = BUILD_TAG.toLowerCase()
-        SKIP_TESTS = ""
   }
 
   stages {
