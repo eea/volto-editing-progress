@@ -13,6 +13,7 @@ pipeline {
         BACKEND_ADDONS = "eea.progress.editing eea.progress.workflow"
         VOLTO = "16"
         IMAGE_NAME = BUILD_TAG.toLowerCase()
+        SKIP_TESTS = ""
   }
 
   stages {
@@ -47,11 +48,8 @@ pipeline {
                check_result = sh script: '''docker run --pull always -i --rm --name="$IMAGE_NAME-gitflow-check" -e GIT_TOKEN="$GITHUB_TOKEN" -e GIT_BRANCH="$BRANCH_NAME" -e GIT_ORG="$GIT_ORG" -e GIT_NAME="$GIT_NAME" eeacms/gitflow /check_if_testing_needed.sh''', returnStatus: true
 
                if ( check_result == 0 ) {
-                    sh '''echo "test"'''
-                    currentBuild.result = 'SUCCESS'
-                    currentBuild.getRawBuild().getExecutor().interrupt(Result.SUCCESS)
-                    sleep(1)
-               }
+                   SKIP_TESTS = "yes"
+                   }
            }
         }
       }
@@ -63,6 +61,7 @@ pipeline {
           allOf {
             not { environment name: 'CHANGE_ID', value: '' }
             environment name: 'CHANGE_TARGET', value: 'develop'
+            environment name: 'SKIP_TESTS', value: ''
           }
           allOf {
             environment name: 'CHANGE_ID', value: ''
@@ -70,6 +69,7 @@ pipeline {
               not { changelog '.*^Automated release [0-9\\.]+$' }
               branch 'master'
             }
+            environment name: 'SKIP_TESTS', value: ''
           }
         }
       }
