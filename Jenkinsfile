@@ -54,7 +54,7 @@ pipeline {
       }
     }
 
-    stage('Build test image') {
+    stage('Testing') {
       when {
         anyOf {
           allOf {
@@ -69,33 +69,18 @@ pipeline {
               branch 'master'
             }
             environment name: 'SKIP_TESTS', value: ''
-          }
-        }
-      }
-      steps {
-        checkout scm
-        sh '''docker build --build-arg="VOLTO_VERSION=$VOLTO" --build-arg="ADDON_NAME=$NAMESPACE/$GIT_NAME"  --build-arg="ADDON_PATH=$GIT_NAME" . -t $IMAGE_NAME-frontend'''
-      }
-     }
-
-
-    stage('Run Tests') {
-      when {
-        anyOf {
-          allOf {
-            not { environment name: 'CHANGE_ID', value: '' }
-            environment name: 'CHANGE_TARGET', value: 'develop'
-          }
-          allOf {
-            environment name: 'CHANGE_ID', value: ''
-            anyOf {
-              not { changelog '.*^Automated release [0-9\\.]+$' }
-              branch 'master'
-            }
           }
         }
       }
       stages {
+           stage('Build test image') {
+               steps {
+                  checkout scm
+                  sh '''docker build --build-arg="VOLTO_VERSION=$VOLTO" --build-arg="ADDON_NAME=$NAMESPACE/$GIT_NAME"  --build-arg="ADDON_PATH=$GIT_NAME" . -t $IMAGE_NAME-frontend'''
+               }
+           }
+
+
           stage("ES lint") {
               steps {
                  sh '''docker run --rm --name="$IMAGE_NAME-eslint" --entrypoint=make --workdir=/app/src/addons/$GIT_NAME  $IMAGE_NAME-frontend lint'''
