@@ -47,7 +47,7 @@ pipeline {
                check_result = sh script: '''docker run --pull always -i --rm --name="$IMAGE_NAME-gitflow-check" -e GIT_TOKEN="$GITHUB_TOKEN" -e GIT_BRANCH="$BRANCH_NAME" -e GIT_ORG="$GIT_ORG" -e GIT_NAME="$GIT_NAME" eeacms/gitflow /check_if_testing_needed.sh''', returnStatus: true
 
                if ( check_result == 0 ) {
-                   SKIP_TESTS = "yes"
+                   env.SKIP_TESTS = "yes"
                    }
            }
         }
