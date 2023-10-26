@@ -161,7 +161,6 @@ pipeline {
                     coverage = sh script: '''docker cp $IMAGE_NAME-cypress:/app/src/addons/$GIT_NAME/coverage cypress-coverage''', returnStatus: true
 
                     if ( coverage == 0 ) {
-                         sh '''
                          publishHTML (target : [allowMissing: false,
                              alwaysLinkToLastBuild: true,
                              keepAll: true,
