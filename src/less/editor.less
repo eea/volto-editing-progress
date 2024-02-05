@@ -7,12 +7,13 @@
     padding: 1.5rem;
   }
 }
+
 .add-btn {
   position: relative;
+  display: flex;
   width: 50px;
   height: 50px;
   padding: 0 !important;
-  display: flex;
 
   border-radius: 50%;
 
@@ -25,6 +26,7 @@
   &:focus {
   }
 }
+
 .soft-required .wrapper {
   > label[for]::after,
   .ui.label::after {
@@ -44,12 +46,15 @@
   -webkit-animation: flash linear 1s 1s 1.5;
   animation: flash linear 1s 1s 1.5;
 }
+
 .title-editing-progress {
-  font-size: 1.5rem !important;
   display: inline-block;
+  font-size: 1.5rem !important;
+
   .dropdown {
     font-size: 1.5rem !important;
   }
+
   .cancel {
     font-size: 1.5rem !important;
   }
