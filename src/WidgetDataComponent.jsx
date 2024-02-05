@@ -5,6 +5,8 @@ import { useSelector, useDispatch } from 'react-redux';
 import { getRawContent } from './actions';
 import { COMPONENT_HEIGHT } from './VisualJSONWidget';
 
+import './less/editor.less';
+
 export function makeFirstLetterCapital(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
@@ -14,6 +16,8 @@ const EditDataComponent = ({
   handleOnDropdownChange,
   currentContentType,
   value,
+  fields,
+  getDropdownValues,
 }) => {
   const path = flattenToAppURL(
     '/@vocabularies/plone.app.vocabularies.WorkflowStates',
@@ -43,19 +47,7 @@ const EditDataComponent = ({
   ]);
 
   //Returns the saved values for dropdown with the first letter in uppercase
-  const getDropdownValues = (currentField) => {
-    if (
-      !request.loading &&
-      request.loaded &&
-      currentContentType &&
-      value[currentContentType.id]
-    )
-      return value[currentContentType.id]
-        .find((rule) => rule?.prefix === currentField)
-        ?.states.map((state) => makeFirstLetterCapital(state));
 
-    return undefined;
-  };
   const getMessage = (currentField) => {
     if (
       !request.loading &&
@@ -77,7 +69,7 @@ const EditDataComponent = ({
   });
 
   const createStateOption = (stateOptions) => {
-    return stateOptions.map((state) => ({
+    return ['all', ...(stateOptions || [])].map((state) => ({
       key: makeFirstLetterCapital(state),
       text: makeFirstLetterCapital(state),
       value: makeFirstLetterCapital(state),
@@ -104,8 +96,8 @@ const EditDataComponent = ({
         width: '100%',
         paddingBottom:
           request?.data?.fieldsets[0]?.fields.length > 9 ? '120px' : '',
-        maxHeight: COMPONENT_HEIGHT,
-        overflow: request?.data?.fieldsets[0]?.fields.length > 9 ? 'auto' : '',
+        height: COMPONENT_HEIGHT,
+        overflow: 'auto',
       }}
     >
       <Accordion styled fluid>
@@ -114,8 +106,12 @@ const EditDataComponent = ({
           requestStateOptions?.loaded &&
           !requestStateOptions?.loading &&
           requestStateOptions?.data &&
-          request?.data?.fieldsets[0]?.fields?.map((currentField, index) => {
-            if (request.data.required.includes(currentField)) return null;
+          fields.map((currentField, index) => {
+            if (
+              request.data.required.includes(currentField) ||
+              getDropdownValues(currentField) === undefined
+            )
+              return null;
             return (
               <React.Fragment key={`${currentField}${index}`}>
                 <Accordion.Title
@@ -126,8 +122,25 @@ const EditDataComponent = ({
                   }
                   id={`property_${currentField}`}
                 >
-                  <Icon name="dropdown" />
-                  {currentField}
+                  <div className="title-editing-progress">
+                    <Icon name="dropdown" size="tiny" />
+                    &nbsp;
+                    {currentField}
+                  </div>
+                  <div className="title-editing-progress">
+                    <Icon
+                      name="cancel"
+                      size="mini"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleOnDropdownChange(
+                          e,
+                          { value: undefined },
+                          currentField,
+                        );
+                      }}
+                    />
+                  </div>
                 </Accordion.Title>
                 <Accordion.Content
                   active={activeIndex === index}
@@ -165,11 +178,13 @@ const EditDataComponent = ({
                     search
                     name="dropdown"
                     defaultValue={getDropdownValues(currentField)}
-                    options={createStateOption(
-                      requestStateOptions.data.items.map(
-                        (option) => option.token,
+                    options={[
+                      ...createStateOption(
+                        requestStateOptions.data.items.map(
+                          (option) => option.token,
+                        ),
                       ),
-                    )}
+                    ]}
                     onChange={(e, data) =>
                       handleOnDropdownChange(e, data, currentField)
                     }

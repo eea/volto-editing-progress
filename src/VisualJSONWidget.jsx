@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ModalForm } from '@plone/volto/components';
 import { JSONSchema } from './schema';
+import { Dropdown } from 'semantic-ui-react';
 import {
   Button,
   Container,
@@ -74,11 +75,6 @@ function createFieldRule(currentField, statesToAdd) {
     prefix: currentField,
     states: statesToAdd,
     condition: 'python:value',
-    hideReady: 'False',
-    iconEmpty: 'eea-icon eea-icon-edit',
-    iconReady: 'eea-icon eea-icon-check',
-    labelEmpty: 'Please set the {label} of this {context.portal_type}',
-    labelReady: 'You added the {label}',
     link: 'edit#fieldset-supporting information-field-label-data_description',
     linkLabel: 'Add {label}',
     message: '',
@@ -99,7 +95,10 @@ const VisualJSONWidget = (props) => {
   const request = useSelector((state) => state.rawdata?.[path]);
   const content = request?.data;
   const types = useSelector((state) => state.types);
-
+  const fields =
+    request?.data?.fieldsets.reduce((acc, cur) => {
+      return [...acc, ...(cur.fields || [])];
+    }, []) || [];
   useEffect(() => {
     if (path && !request?.loading && !request?.loaded && !content)
       dispatch(getRawContent(path));
@@ -120,7 +119,9 @@ const VisualJSONWidget = (props) => {
     e.preventDefault();
     setIsJSONEditorOpen(true);
   };
-
+  const makeFirstLetterCapital = (string) => {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+  };
   const onJSONSubmit = (e) => {
     setIsJSONEditorOpen(false);
     if (typeof e.json === 'string' && isValidJson(e.json)) {
@@ -135,7 +136,7 @@ const VisualJSONWidget = (props) => {
   };
 
   const handleOnDropdownChange = (e, data, currentField, message) => {
-    const states = data?.value?.length > 0 ? data?.value : undefined;
+    const states = data.value;
     const statesToAdd = states?.map((state) => state.toLowerCase());
     const localCopyOfValue = _.cloneDeep(value);
     const currentContentTypeData = localCopyOfValue[currentContentType.id];
@@ -167,7 +168,19 @@ const VisualJSONWidget = (props) => {
     }
     onChange(id, localCopyOfValue);
   };
+  const getDropdownValues = (currentField) => {
+    if (
+      !request.loading &&
+      request.loaded &&
+      currentContentType &&
+      value[currentContentType.id]
+    )
+      return value[currentContentType.id]
+        .find((rule) => rule?.prefix === currentField)
+        ?.states.map((state) => makeFirstLetterCapital(state));
 
+    return undefined;
+  };
   return (
     <>
       <div>
@@ -182,10 +195,34 @@ const VisualJSONWidget = (props) => {
             key="JSON"
           />
         )}
-        <Container>
+        <Container style={{ display: 'flex', width: '100%' }}>
           <Button onClick={handleEditJSON} color="grey" id="json_button">
             <FormattedMessage id="Edit JSON" defaultMessage="Edit JSON" />
           </Button>
+          {fields && (
+            <Dropdown
+              fluid
+              button
+              floating
+              labeled
+              style={{ textAlign: 'center', backgroundColor: 'grey' }}
+              options={fields
+                .filter((field) => {
+                  return (
+                    getDropdownValues(field) === undefined &&
+                    !request.data.required.includes(field)
+                  );
+                })
+                .map((field) => {
+                  return { key: field, text: field, value: field };
+                })}
+              onChange={(e, t) => {
+                handleOnDropdownChange(e, { value: ['all'] }, t.value);
+              }}
+              search
+              text="Add Property"
+            />
+          )}
         </Container>
         <Divider />
       </div>
@@ -202,6 +239,8 @@ const VisualJSONWidget = (props) => {
             handleOnDropdownChange={handleOnDropdownChange}
             currentContentType={currentContentType}
             value={value}
+            fields={fields}
+            getDropdownValues={getDropdownValues}
           />
         </Sidebar.Pusher>
       </Sidebar.Pushable>
