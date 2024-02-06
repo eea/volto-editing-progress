@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ModalForm } from '@plone/volto/components';
 import { JSONSchema } from './schema';
 import { Dropdown } from 'semantic-ui-react';
+
 import {
   Button,
   Container,
@@ -83,7 +84,6 @@ function createFieldRule(currentField, statesToAdd) {
 
 const VisualJSONWidget = (props) => {
   const { id, value = {}, onChange } = props;
-  // console.log(value);
   const [isJSONEditorOpen, setIsJSONEditorOpen] = useState(false);
   const [currentContentType, setCurrentContentType] = useState();
 
@@ -181,6 +181,7 @@ const VisualJSONWidget = (props) => {
 
     return undefined;
   };
+
   return (
     <>
       <div>
@@ -199,13 +200,11 @@ const VisualJSONWidget = (props) => {
           <Button onClick={handleEditJSON} color="grey" id="json_button">
             <FormattedMessage id="Edit JSON" defaultMessage="Edit JSON" />
           </Button>
+
           {fields && (
             <Dropdown
-              fluid
-              button
-              floating
-              labeled
-              style={{ textAlign: 'center', backgroundColor: 'grey' }}
+              className="ui grey button dropdown-button"
+              text="Add Property"
               options={fields
                 .filter((field) => {
                   return (
@@ -219,8 +218,6 @@ const VisualJSONWidget = (props) => {
               onChange={(e, t) => {
                 handleOnDropdownChange(e, { value: ['all'] }, t.value);
               }}
-              search
-              text="Add Property"
             />
           )}
         </Container>
