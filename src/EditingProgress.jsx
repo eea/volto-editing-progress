@@ -86,7 +86,7 @@ const EditingProgress = (props) => {
                 className={'sidenav-ol sidenav-ol--ep is-hidden'}
                 ref={sideMenuRef}
               >
-                {remaining_steps.map((step, index) => {
+                {remaining_steps.map((step) => {
                   return (
                     <li className={'ep-sidenav-li'} key={step['link_label']}>
                       <a

@@ -44,6 +44,8 @@ function addNewStateToAlreadyExistingField(
   currentField,
   statesToAdd,
   message,
+  condition,
+  link,
 ) {
   for (
     let localRuleIndex = 0;
@@ -57,7 +59,9 @@ function addNewStateToAlreadyExistingField(
     // to currentContentTypeData dinamically in order to create the posibillity
     // for multiple fields
 
-    if (message) currentContentTypeData[localRuleIndex].message = message;
+    if (message) currentContentTypeData[localRuleIndex].linkLabel = message;
+    if (condition) currentContentTypeData[localRuleIndex].condition = condition;
+    if (link) currentContentTypeData[localRuleIndex].link = link;
     if (statesToAdd !== undefined) {
       currentContentTypeData[localRuleIndex].states = statesToAdd;
     } else if (!message) currentContentTypeData.splice(localRuleIndex, 1);
@@ -76,9 +80,8 @@ function createFieldRule(currentField, statesToAdd) {
     prefix: currentField,
     states: statesToAdd,
     condition: 'python:value',
-    link: 'edit#fieldset-supporting information-field-label-data_description',
+    link: 'edit#fieldset-metadata-field-label-' + currentField,
     linkLabel: 'Add {label}',
-    message: '',
   };
 }
 
@@ -135,8 +138,16 @@ const VisualJSONWidget = (props) => {
     setCurrentContentType(type);
   };
 
-  const handleOnDropdownChange = (e, data, currentField, message) => {
+  const handleOnDropdownChange = (
+    e,
+    data,
+    currentField,
+    message,
+    condition,
+    link,
+  ) => {
     const states = data.value;
+    console.log(states);
     const statesToAdd = states?.map((state) => state.toLowerCase());
     const localCopyOfValue = _.cloneDeep(value);
     const currentContentTypeData = localCopyOfValue[currentContentType.id];
@@ -160,6 +171,8 @@ const VisualJSONWidget = (props) => {
         currentField,
         statesToAdd,
         message,
+        condition,
+        link,
       );
     }
     //The variable currentContentTypeData cannot be used here because of eslint and delete keyword
