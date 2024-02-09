@@ -147,7 +147,6 @@ const VisualJSONWidget = (props) => {
     link,
   ) => {
     const states = data.value;
-    console.log(states);
     const statesToAdd = states?.map((state) => state.toLowerCase());
     const localCopyOfValue = _.cloneDeep(value);
     const currentContentTypeData = localCopyOfValue[currentContentType.id];
