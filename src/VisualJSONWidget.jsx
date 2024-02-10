@@ -208,7 +208,7 @@ const VisualJSONWidget = (props) => {
             key="JSON"
           />
         )}
-        <Container style={{ display: 'flex', width: '100%' }}>
+        <Container>
           <Button onClick={handleEditJSON} color="grey" id="json_button">
             <FormattedMessage id="Edit JSON" defaultMessage="Edit JSON" />
           </Button>

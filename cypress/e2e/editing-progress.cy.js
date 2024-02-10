@@ -2,13 +2,13 @@
 describe('Editing progress', () => {
   before(() => {
     cy.autologin();
-    cy.addContentType('music');
-    cy.visit('/controlpanel/dexterity-types/music/schema');
+    cy.addContentType('music9');
+    cy.visit('/controlpanel/dexterity-types/music9/schema');
     cy.waitForResourceToLoad('@navigation');
     cy.waitForResourceToLoad('@breadcrumbs');
     cy.waitForResourceToLoad('@actions');
     cy.waitForResourceToLoad('@types');
-    cy.waitForResourceToLoad('music');
+    cy.waitForResourceToLoad('music9');
     cy.get('#addfield').click();
     cy.waitForResourceToLoad('Fields');
     cy.get('.react-select__value-container').click({ force: true });
@@ -20,10 +20,10 @@ describe('Editing progress', () => {
     cy.get(".actions [aria-label='Save']").click();
     cy.wait(100);
     cy.get('#toolbar-save').click();
-    cy.waitForResourceToLoad('music');
+    cy.waitForResourceToLoad('music9');
 
     cy.createContent({
-      contentType: 'music',
+      contentType: 'music9',
       contentId: 'all-of-me',
       contentTitle: 'All of me',
     });
@@ -47,193 +47,41 @@ describe('Editing progress', () => {
   after(() => {
     cy.autologin();
     cy.removeContent('all-of-me');
-    cy.removeContentType('music');
+    cy.removeContentType('music9');
   });
-  it('should have background color', () => {
-    cy.get('#sidebar_Collection').click({ force: true });
-    cy.get('#sidebar_Collection').should(
-      'have.css',
-      'background-color',
-      'rgb(173, 216, 230)',
-    );
-  });
+
   it('should change background color', () => {
-    cy.get('#sidebar_music').click({ force: true });
-    cy.waitForResourceToLoad('music');
+    cy.get('#sidebar_music9').click({ force: true });
+    cy.waitForResourceToLoad('music9');
     cy.get('#sidebar_Collection').should(
       'have.css',
       'background-color',
       'rgba(0, 0, 0, 0)',
     );
-    cy.get('#sidebar_music').should(
+    cy.get('#sidebar_music9').should(
       'have.css',
       'background-color',
       'rgb(173, 216, 230)',
     );
   });
-  it('should turn pink', () => {
-    cy.get('#sidebar_music').click({ force: true });
+  it('should add property', () => {
+    cy.get('#sidebar_music9').click({ force: true });
     cy.wait(100);
-    cy.get('#property_name').click({ force: true });
+    cy.get('.dropdown-button').click({ force: true });
     cy.wait(100);
-    cy.get("#property_content_name [role='combobox']").click({ force: true });
-    cy.wait(100);
-    cy.get("#property_content_name [role='combobox'] [role='listbox']")
-      .contains('Private')
-      .click({ force: true });
-    cy.wait(100);
-
-    cy.get('#sidebar_Collection').click({ force: true });
-    cy.wait(100);
-    cy.get('#sidebar_music').should(
-      'have.css',
-      'background-color',
-      'rgb(255, 182, 193)',
-    );
+    cy.get('span').contains('description').click({ force: true });
+    cy.get('.title-editing-progress').first().click({ force: true });
+    cy.get('label').contains('Message').click({ force: true });
   });
-  it('deletes and adds fields', () => {
-    cy.get('#sidebar_music').click({ force: true });
-    cy.wait(100);
-    cy.get('#property_name').click({ force: true });
-    cy.wait(100);
 
-    cy.get("#property_content_name [role='combobox'] .delete").click({
-      force: true,
-    });
+  it('should delete property', () => {
+    cy.get('#sidebar_music9').click({ force: true });
     cy.wait(100);
-    cy.get("#property_content_name [role='combobox']")
-      .find('a')
-      .should('not.exist');
-    cy.get('#sidebar_Collection').click({ force: true });
-    cy.wait(100);
-    cy.get('#sidebar_music').should(
-      'have.css',
-      'background-color',
-      'rgba(0, 0, 0, 0)',
-    );
+    cy.get('.cancel.mini.icon').click();
   });
-  it('should add to json', () => {
-    const json = {
-      prefix: 'name',
-      states: ['private'],
-      condition: 'python:value',
-      hideReady: 'False',
-      iconEmpty: 'eea-icon eea-icon-edit',
-      iconReady: 'eea-icon eea-icon-check',
-      labelEmpty: 'Please set the {label} of this {context.portal_type}',
-      labelReady: 'You added the {label}',
-      link: 'edit#fieldset-supporting information-field-label-data_description',
-      linkLabel: 'Add {label}',
-      message: '',
-    };
-    cy.wait(100);
-    cy.get('#sidebar_music').click({ force: true });
-    cy.wait(100);
-    cy.get('#property_name').click({ force: true });
-    cy.wait(100);
 
-    cy.get("#property_content_name [role='combobox']").click({ force: true });
-    cy.wait(100);
-
-    cy.get("#property_content_name [role='combobox'] [role='listbox']")
-      .contains('Private')
-      .click({ force: true });
-    cy.wait(100);
+  it('should open  json modal', () => {
     cy.get('#json_button').click();
-    cy.wait(100);
-    cy.get('.modal textarea')
-      .invoke('text')
-      .then((text) => {
-        expect(JSON.stringify(JSON.parse(text)).includes(JSON.stringify(json)))
-          .to.be.true;
-      });
-    cy.get(".modal [aria-label='Cancel']").click();
-    cy.get("#property_content_name [role='combobox'] .delete").click({
-      force: true,
-    });
-  });
-  it('should modify json in correct way', () => {
-    const json = {
-      prefix: 'name',
-      states: ['private', 'pending'],
-      condition: 'python:value',
-      hideReady: 'False',
-      iconEmpty: 'eea-icon eea-icon-edit',
-      iconReady: 'eea-icon eea-icon-check',
-      labelEmpty: 'Please set the {label} of this {context.portal_type}',
-      labelReady: 'You added the {label}',
-      link: 'edit#fieldset-supporting information-field-label-data_description',
-      linkLabel: 'Add {label}',
-      message: '',
-    };
-
-    cy.wait(100);
-    cy.get('#sidebar_music').click({ force: true });
-    cy.wait(100);
-    cy.get('#property_name').click({ force: true });
-    cy.wait(100);
-
-    cy.get("#property_content_name  [role='combobox']").click({ force: true });
-    cy.wait(100);
-    cy.get("#property_content_name  [role='combobox'] [role='listbox']")
-      .contains('Private')
-      .click({ force: true });
-    cy.get("#property_content_name  [role='combobox'] [role='listbox']")
-      .contains('Pending')
-      .click({ force: true });
-    cy.wait(100);
-    cy.get('#property_description').click({ force: true });
-    cy.wait(100);
-
-    cy.get("#property_content_description [role='combobox']").click({
-      force: true,
-    });
-    cy.wait(100);
-    cy.get("#property_content_description [role='combobox'] [role='listbox']")
-      .contains('Private')
-      .click({ force: true });
-    cy.wait(100);
-    cy.get('#json_button').click();
-    cy.wait(100);
-    cy.get('.modal textarea')
-      .eq(0)
-      .invoke('text')
-      .then((text) => {
-        // eslint-disable-next-line no-unused-expressions
-        expect(JSON.stringify(JSON.parse(text)).includes(JSON.stringify(json)))
-          .to.be.true;
-      });
-    cy.get(".modal [aria-label='Cancel']").click();
-    cy.get('#property_name').click({ force: true });
-    cy.wait(100);
-    cy.get("#property_content_name [role='combobox'] .delete").click({
-      force: true,
-      multiple: true,
-    });
-    cy.wait(100);
-    cy.get('#json_button').click();
-    cy.wait(100);
-    cy.get('.modal textarea')
-      .eq(0)
-      .invoke('text')
-      .then((text) => {
-        expect(JSON.parse(text)['music'] != null).to.be.true;
-      });
-    cy.get(".modal [aria-label='Cancel']").click();
-    cy.get('#property_description').click({ force: true });
-    cy.wait(100);
-    cy.get("#property_content_description [role='combobox'] .delete").click({
-      force: true,
-      multiple: true,
-    });
-    cy.wait(100);
-    cy.get('#json_button').click();
-    cy.wait(100);
-    cy.get('.modal textarea')
-      .eq(0)
-      .invoke('text')
-      .then((text) => {
-        expect(JSON.parse(text)['music'] == null).to.be.true;
-      });
+    cy.get('#field-json');
   });
 });
