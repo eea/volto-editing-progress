@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { ModalForm } from '@plone/volto/components';
 import { JSONSchema } from './schema';
+import { Dropdown } from 'semantic-ui-react';
+
 import {
   Button,
   Container,
@@ -42,6 +44,8 @@ function addNewStateToAlreadyExistingField(
   currentField,
   statesToAdd,
   message,
+  condition,
+  link,
 ) {
   for (
     let localRuleIndex = 0;
@@ -55,7 +59,9 @@ function addNewStateToAlreadyExistingField(
     // to currentContentTypeData dinamically in order to create the posibillity
     // for multiple fields
 
-    if (message) currentContentTypeData[localRuleIndex].message = message;
+    if (message) currentContentTypeData[localRuleIndex].linkLabel = message;
+    if (condition) currentContentTypeData[localRuleIndex].condition = condition;
+    if (link) currentContentTypeData[localRuleIndex].link = link;
     if (statesToAdd !== undefined) {
       currentContentTypeData[localRuleIndex].states = statesToAdd;
     } else if (!message) currentContentTypeData.splice(localRuleIndex, 1);
@@ -74,20 +80,13 @@ function createFieldRule(currentField, statesToAdd) {
     prefix: currentField,
     states: statesToAdd,
     condition: 'python:value',
-    hideReady: 'False',
-    iconEmpty: 'eea-icon eea-icon-edit',
-    iconReady: 'eea-icon eea-icon-check',
-    labelEmpty: 'Please set the {label} of this {context.portal_type}',
-    labelReady: 'You added the {label}',
-    link: 'edit#fieldset-supporting information-field-label-data_description',
+    link: 'edit#fieldset-metadata-field-label-' + currentField,
     linkLabel: 'Add {label}',
-    message: '',
   };
 }
 
 const VisualJSONWidget = (props) => {
   const { id, value = {}, onChange } = props;
-  // console.log(value);
   const [isJSONEditorOpen, setIsJSONEditorOpen] = useState(false);
   const [currentContentType, setCurrentContentType] = useState();
 
@@ -99,7 +98,10 @@ const VisualJSONWidget = (props) => {
   const request = useSelector((state) => state.rawdata?.[path]);
   const content = request?.data;
   const types = useSelector((state) => state.types);
-
+  const fields =
+    request?.data?.fieldsets.reduce((acc, cur) => {
+      return [...acc, ...(cur.fields || [])];
+    }, []) || [];
   useEffect(() => {
     if (path && !request?.loading && !request?.loaded && !content)
       dispatch(getRawContent(path));
@@ -120,7 +122,9 @@ const VisualJSONWidget = (props) => {
     e.preventDefault();
     setIsJSONEditorOpen(true);
   };
-
+  const makeFirstLetterCapital = (string) => {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+  };
   const onJSONSubmit = (e) => {
     setIsJSONEditorOpen(false);
     if (typeof e.json === 'string' && isValidJson(e.json)) {
@@ -134,8 +138,15 @@ const VisualJSONWidget = (props) => {
     setCurrentContentType(type);
   };
 
-  const handleOnDropdownChange = (e, data, currentField, message) => {
-    const states = data?.value?.length > 0 ? data?.value : undefined;
+  const handleOnDropdownChange = (
+    e,
+    data,
+    currentField,
+    message,
+    condition,
+    link,
+  ) => {
+    const states = data.value;
     const statesToAdd = states?.map((state) => state.toLowerCase());
     const localCopyOfValue = _.cloneDeep(value);
     const currentContentTypeData = localCopyOfValue[currentContentType.id];
@@ -159,6 +170,8 @@ const VisualJSONWidget = (props) => {
         currentField,
         statesToAdd,
         message,
+        condition,
+        link,
       );
     }
     //The variable currentContentTypeData cannot be used here because of eslint and delete keyword
@@ -166,6 +179,19 @@ const VisualJSONWidget = (props) => {
       delete localCopyOfValue[currentContentType.id];
     }
     onChange(id, localCopyOfValue);
+  };
+  const getDropdownValues = (currentField) => {
+    if (
+      !request.loading &&
+      request.loaded &&
+      currentContentType &&
+      value[currentContentType.id]
+    )
+      return value[currentContentType.id]
+        .find((rule) => rule?.prefix === currentField)
+        ?.states.map((state) => makeFirstLetterCapital(state));
+
+    return undefined;
   };
 
   return (
@@ -186,6 +212,26 @@ const VisualJSONWidget = (props) => {
           <Button onClick={handleEditJSON} color="grey" id="json_button">
             <FormattedMessage id="Edit JSON" defaultMessage="Edit JSON" />
           </Button>
+
+          {fields && (
+            <Dropdown
+              className="ui grey button dropdown-button"
+              text="Add Property"
+              options={fields
+                .filter((field) => {
+                  return (
+                    getDropdownValues(field) === undefined &&
+                    !request.data.required.includes(field)
+                  );
+                })
+                .map((field) => {
+                  return { key: field, text: field, value: field };
+                })}
+              onChange={(e, t) => {
+                handleOnDropdownChange(e, { value: ['all'] }, t.value);
+              }}
+            />
+          )}
         </Container>
         <Divider />
       </div>
@@ -202,6 +248,8 @@ const VisualJSONWidget = (props) => {
             handleOnDropdownChange={handleOnDropdownChange}
             currentContentType={currentContentType}
             value={value}
+            fields={fields}
+            getDropdownValues={getDropdownValues}
           />
         </Sidebar.Pusher>
       </Sidebar.Pushable>
