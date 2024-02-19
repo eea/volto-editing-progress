@@ -5,6 +5,8 @@ import { useSelector, useDispatch } from 'react-redux';
 import { getRawContent } from './actions';
 import { COMPONENT_HEIGHT } from './VisualJSONWidget';
 
+import './less/editor.less';
+
 export function makeFirstLetterCapital(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
@@ -14,6 +16,8 @@ const EditDataComponent = ({
   handleOnDropdownChange,
   currentContentType,
   value,
+  fields,
+  getDropdownValues,
 }) => {
   const path = flattenToAppURL(
     '/@vocabularies/plone.app.vocabularies.WorkflowStates',
@@ -43,41 +47,28 @@ const EditDataComponent = ({
   ]);
 
   //Returns the saved values for dropdown with the first letter in uppercase
-  const getDropdownValues = (currentField) => {
+
+  const getValues = (currentField) => {
     if (
       !request.loading &&
       request.loaded &&
       currentContentType &&
       value[currentContentType.id]
     )
-      return value[currentContentType.id]
-        .find((rule) => rule?.prefix === currentField)
-        ?.states.map((state) => makeFirstLetterCapital(state));
+      return value[currentContentType.id].find(
+        (rule) => rule?.prefix === currentField,
+      );
 
     return undefined;
   };
-  const getMessage = (currentField) => {
-    if (
-      !request.loading &&
-      request.loaded &&
-      currentContentType &&
-      value[currentContentType.id]
-    )
-      return (
-        value[currentContentType.id].find(
-          (rule) => rule?.prefix === currentField,
-        )?.message || ''
-      );
 
-    return '';
-  };
   const renderLabel = (label) => ({
     color: 'blue',
     content: `${label.text}`,
   });
 
   const createStateOption = (stateOptions) => {
-    return stateOptions.map((state) => ({
+    return ['all', ...(stateOptions || [])].map((state) => ({
       key: makeFirstLetterCapital(state),
       text: makeFirstLetterCapital(state),
       value: makeFirstLetterCapital(state),
@@ -86,17 +77,46 @@ const EditDataComponent = ({
   const [activeIndex, setActiveIndex] = useState(0);
   // const inputRef = useRef();
   const [inputValue, setInputValue] = useState('');
-
+  const [conditionValue, setConditionValue] = useState('');
+  const [linkValue, setLinkValue] = useState();
   const handleClick = (e, titleProps, currentField) => {
     const { index } = titleProps;
     const newIndex = activeIndex === index ? -1 : index;
 
     setActiveIndex(newIndex);
-    setInputValue(getMessage(currentField));
+    setInputValue(getValues(currentField)?.linkLabel || '');
+    setConditionValue(getValues(currentField)?.condition || '');
+    setLinkValue(getValues(currentField)?.link || '');
   };
   const handleInputChange = (e, currentField) => {
     setInputValue(e.target.value);
-    handleOnDropdownChange(null, null, currentField, e.target.value);
+    handleOnDropdownChange(
+      null,
+      { value: getValues(currentField).states || [] },
+      currentField,
+      e.target.value,
+    );
+  };
+  const handleInputLinkChange = (e, currentField) => {
+    setLinkValue(e.target.value);
+    handleOnDropdownChange(
+      null,
+      { value: getValues(currentField).states || [] },
+      currentField,
+      undefined,
+      undefined,
+      e.target.value,
+    );
+  };
+  const handleInputConditionChange = (e, currentField) => {
+    setConditionValue(e.target.value);
+    handleOnDropdownChange(
+      null,
+      { value: getValues(currentField).states || [] },
+      currentField,
+      undefined,
+      e.target.value,
+    );
   };
   return (
     <Segment
@@ -104,8 +124,8 @@ const EditDataComponent = ({
         width: '100%',
         paddingBottom:
           request?.data?.fieldsets[0]?.fields.length > 9 ? '120px' : '',
-        maxHeight: COMPONENT_HEIGHT,
-        overflow: request?.data?.fieldsets[0]?.fields.length > 9 ? 'auto' : '',
+        height: COMPONENT_HEIGHT,
+        overflow: 'auto',
       }}
     >
       <Accordion styled fluid>
@@ -114,8 +134,12 @@ const EditDataComponent = ({
           requestStateOptions?.loaded &&
           !requestStateOptions?.loading &&
           requestStateOptions?.data &&
-          request?.data?.fieldsets[0]?.fields?.map((currentField, index) => {
-            if (request.data.required.includes(currentField)) return null;
+          fields.map((currentField, index) => {
+            if (
+              request.data.required.includes(currentField) ||
+              getDropdownValues(currentField) === undefined
+            )
+              return null;
             return (
               <React.Fragment key={`${currentField}${index}`}>
                 <Accordion.Title
@@ -126,31 +150,80 @@ const EditDataComponent = ({
                   }
                   id={`property_${currentField}`}
                 >
-                  <Icon name="dropdown" />
-                  {currentField}
+                  <div className="title-editing-progress">
+                    <Icon name="dropdown" size="tiny" />
+                    &nbsp;
+                    {currentField}
+                  </div>
+                  <div className="title-editing-progress">
+                    <Icon
+                      name="cancel"
+                      size="mini"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleOnDropdownChange(
+                          e,
+                          { value: undefined },
+                          currentField,
+                        );
+                      }}
+                    />
+                  </div>
                 </Accordion.Title>
                 <Accordion.Content
                   active={activeIndex === index}
                   id={`property_content_${currentField}`}
                 >
-                  <>
-                    <label
-                      htmlFor="message"
-                      style={{ display: 'block', padding: '10px' }}
-                    >
-                      Message
-                    </label>
-                    <input
-                      className="message-input"
-                      value={inputValue}
-                      onChange={(e) => handleInputChange(e, currentField)}
-                      // ref={inputRef}
-                      name="message"
-                      style={{ padding: '10px' }}
-                      disabled={getDropdownValues(currentField) == null}
-                      placeholder="Write a dfferent message after you set at lest one state"
-                    />
-                  </>
+                  <label
+                    htmlFor="message"
+                    style={{ display: 'block', padding: '10px' }}
+                  >
+                    Message
+                  </label>
+                  <input
+                    className="message-input"
+                    value={inputValue}
+                    onChange={(e) => handleInputChange(e, currentField)}
+                    // ref={inputRef}
+                    name="message"
+                    style={{ padding: '10px' }}
+                    disabled={getDropdownValues(currentField) == null}
+                    placeholder="Write a dfferent message after you set at lest one state"
+                  />
+                  <label
+                    htmlFor="message"
+                    style={{ display: 'block', padding: '10px' }}
+                  >
+                    Link
+                  </label>
+                  <input
+                    className="link-input"
+                    value={linkValue}
+                    onChange={(e) => handleInputLinkChange(e, currentField)}
+                    // ref={inputRef}
+                    name="link"
+                    style={{ padding: '10px' }}
+                    disabled={getDropdownValues(currentField) == null}
+                    placeholder="Write a dfferent href link"
+                  />
+                  <label
+                    htmlFor="condition"
+                    style={{ display: 'block', padding: '10px' }}
+                  >
+                    Condition
+                  </label>
+                  <input
+                    className="condition-input"
+                    value={conditionValue}
+                    onChange={(e) =>
+                      handleInputConditionChange(e, currentField)
+                    }
+                    // ref={inputRef}
+                    name="condition"
+                    style={{ padding: '10px' }}
+                    disabled={getDropdownValues(currentField) == null}
+                    placeholder="Write a dfferent condition"
+                  />
                   <label
                     htmlFor="dropdown"
                     style={{ display: 'block', padding: '10px' }}
@@ -165,11 +238,13 @@ const EditDataComponent = ({
                     search
                     name="dropdown"
                     defaultValue={getDropdownValues(currentField)}
-                    options={createStateOption(
-                      requestStateOptions.data.items.map(
-                        (option) => option.token,
+                    options={[
+                      ...createStateOption(
+                        requestStateOptions.data.items.map(
+                          (option) => option.token,
+                        ),
                       ),
-                    )}
+                    ]}
                     onChange={(e, data) =>
                       handleOnDropdownChange(e, data, currentField)
                     }

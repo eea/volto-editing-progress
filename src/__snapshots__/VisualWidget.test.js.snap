@@ -13,6 +13,35 @@ Array [
       >
         Edit JSON
       </button>
+      <div
+        aria-expanded={false}
+        className="ui dropdown ui grey button dropdown-button"
+        onBlur={[Function]}
+        onChange={[Function]}
+        onClick={[Function]}
+        onFocus={[Function]}
+        onKeyDown={[Function]}
+        onMouseDown={[Function]}
+        role="listbox"
+        tabIndex={0}
+      >
+        <div
+          aria-atomic={true}
+          aria-live="polite"
+          className="divider text"
+          role="alert"
+        >
+          Add Property
+        </div>
+        <i
+          aria-hidden="true"
+          className="dropdown icon"
+          onClick={[Function]}
+        />
+        <div
+          className="menu transition"
+        />
+      </div>
     </div>
     <div
       className="ui divider"
@@ -59,8 +88,8 @@ Array [
         className="ui segment"
         style={
           Object {
-            "maxHeight": "750px",
-            "overflow": "",
+            "height": "750px",
+            "overflow": "auto",
             "paddingBottom": "",
             "width": "100%",
           }
