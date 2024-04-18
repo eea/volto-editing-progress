@@ -4,11 +4,7 @@ describe('Editing progress', () => {
     cy.autologin();
     cy.addContentType('music');
     cy.visit('/controlpanel/dexterity-types/music/schema');
-    cy.waitForResourceToLoad('@navigation');
-    cy.waitForResourceToLoad('@breadcrumbs');
-    cy.waitForResourceToLoad('@actions');
-    cy.waitForResourceToLoad('@types');
-    cy.waitForResourceToLoad('music');
+
     cy.get('#addfield').click();
     cy.waitForResourceToLoad('Fields');
     cy.get('.react-select__value-container').click({ force: true });
@@ -28,21 +24,10 @@ describe('Editing progress', () => {
       contentTitle: 'All of me',
     });
     cy.visit('/all-of-me');
-    cy.waitForResourceToLoad('@navigation');
-    cy.waitForResourceToLoad('@breadcrumbs');
-    cy.waitForResourceToLoad('@actions');
-    cy.waitForResourceToLoad('@types');
-    cy.waitForResourceToLoad('all-of-me');
-    cy.navigate('/all-of-me');
   });
   beforeEach(() => {
     cy.autologin();
-    cy.navigate('/controlpanel/progress.editing');
-    cy.waitForResourceToLoad('@navigation');
-    cy.waitForResourceToLoad('@breadcrumbs');
-    cy.waitForResourceToLoad('@actions');
-    cy.waitForResourceToLoad('@types');
-    cy.waitForResourceToLoad('progress.editing');
+    cy.visit('/controlpanel/progress.editing');
   });
   after(() => {
     cy.autologin();
@@ -52,7 +37,6 @@ describe('Editing progress', () => {
 
   it('should change background color', () => {
     cy.get('#sidebar_music').click({ force: true });
-    cy.waitForResourceToLoad('music');
     cy.get('#sidebar_Collection').should(
       'have.css',
       'background-color',
@@ -64,7 +48,7 @@ describe('Editing progress', () => {
       'rgb(173, 216, 230)',
     );
   });
-  it('should add property', () => {
+  it('should add and delete property', () => {
     cy.get('#sidebar_music').click({ force: true });
     cy.wait(100);
     cy.get('.dropdown-button').click({ force: true });
@@ -72,9 +56,7 @@ describe('Editing progress', () => {
     cy.get('span').contains('description').click({ force: true });
     cy.get('.title-editing-progress').first().click({ force: true });
     cy.get('label').contains('Message').click({ force: true });
-  });
 
-  it('should delete property', () => {
     cy.get('#sidebar_music').click({ force: true });
     cy.wait(100);
     cy.get('.cancel.mini.icon').click();
