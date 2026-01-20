@@ -187,10 +187,7 @@ describe('EditDataComponent with enforceCharLimits', () => {
           loaded: true,
           loading: false,
           data: {
-            items: [
-              { token: 'published' },
-              { token: 'private' },
-            ],
+            items: [{ token: 'published' }, { token: 'private' }],
           },
         },
       },
@@ -210,9 +207,16 @@ describe('EditDataComponent with enforceCharLimits', () => {
       <Provider store={store}>
         <MemoryRouter>
           <EditDataComponent
-            request={{ loaded: true, loading: false, data: { fieldsets: [{ fields: [] }], required: [] } }}
+            request={{
+              loaded: true,
+              loading: false,
+              data: { fieldsets: [{ fields: [] }], required: [] },
+            }}
             handleOnDropdownChange={jest.fn()}
-            currentContentType={{ id: 'content-type-1', title: 'Content Type 1' }}
+            currentContentType={{
+              id: 'content-type-1',
+              title: 'Content Type 1',
+            }}
             value={value}
             fields={[]}
             getDropdownValues={jest.fn()}
@@ -237,10 +241,7 @@ describe('EditDataComponent with enforceCharLimits', () => {
           loaded: true,
           loading: false,
           data: {
-            items: [
-              { token: 'published' },
-              { token: 'private' },
-            ],
+            items: [{ token: 'published' }, { token: 'private' }],
           },
         },
       },
@@ -250,9 +251,16 @@ describe('EditDataComponent with enforceCharLimits', () => {
       <Provider store={store}>
         <MemoryRouter>
           <EditDataComponent
-            request={{ loaded: true, loading: false, data: { fieldsets: [{ fields: [] }], required: [] } }}
+            request={{
+              loaded: true,
+              loading: false,
+              data: { fieldsets: [{ fields: [] }], required: [] },
+            }}
             handleOnDropdownChange={jest.fn()}
-            currentContentType={{ id: 'content-type-1', title: 'Content Type 1' }}
+            currentContentType={{
+              id: 'content-type-1',
+              title: 'Content Type 1',
+            }}
             value={{}}
             fields={[]}
             getDropdownValues={jest.fn()}
@@ -263,6 +271,8 @@ describe('EditDataComponent with enforceCharLimits', () => {
       </Provider>,
     );
 
-    expect(screen.queryByText('Enforce character limits')).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('Enforce character limits'),
+    ).not.toBeInTheDocument();
   });
 });
