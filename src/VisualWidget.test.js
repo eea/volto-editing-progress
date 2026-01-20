@@ -658,6 +658,8 @@ describe('EditDataComponent with enforceCharLimits', () => {
       </Provider>,
     );
 
-    expect(screen.queryByText('Enforce character limits')).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('Enforce character limits'),
+    ).not.toBeInTheDocument();
   });
 });
