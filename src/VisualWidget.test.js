@@ -808,7 +808,9 @@ describe('ScrollIntoView', () => {
     document.getElementById = jest.fn().mockReturnValue(mockElement);
 
     render(
-      <ScrollIntoView location={{ hash: '#test-element', pathname: '/test' }} />,
+      <ScrollIntoView
+        location={{ hash: '#test-element', pathname: '/test' }}
+      />,
     );
 
     jest.advanceTimersByTime(250);
@@ -829,9 +831,7 @@ describe('ScrollIntoView', () => {
     const clearIntervalSpy = jest.spyOn(window, 'clearInterval');
 
     render(
-      <ScrollIntoView
-        location={{ hash: '#nonexistent', pathname: '/test' }}
-      />,
+      <ScrollIntoView location={{ hash: '#nonexistent', pathname: '/test' }} />,
     );
 
     // Run 41 intervals (250ms each)
@@ -895,9 +895,7 @@ describe('ScrollIntoView', () => {
   it('does nothing on server side', () => {
     global.__CLIENT__ = false;
 
-    render(
-      <ScrollIntoView location={{ hash: '#test', pathname: '/test' }} />,
-    );
+    render(<ScrollIntoView location={{ hash: '#test', pathname: '/test' }} />);
 
     // Should not throw or do anything
     expect(true).toBe(true);
