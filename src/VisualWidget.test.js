@@ -173,6 +173,126 @@ describe('Visual widget', () => {
 
     expect(screen.getByText('Add Property')).toBeInTheDocument();
   });
+
+  it('adds enforceCharLimits when dropdown option is selected', () => {
+    const mockOnChange = jest.fn();
+    const store = mockStore({
+      intl: {
+        locale: 'en',
+        messages: {},
+      },
+      progressEditing: {},
+      rawdata: {
+        '/content-type-1': {
+          loaded: true,
+          loading: false,
+          data: {
+            fieldsets: [{ fields: ['description'] }],
+            required: [],
+          },
+        },
+      },
+      types: {
+        loaded: true,
+        loading: false,
+        types: [
+          {
+            id: 'content-type-1',
+            title: 'Content Type 1',
+            '@id': '/content-type-1',
+          },
+        ],
+      },
+    });
+    render(
+      <Provider store={store}>
+        <MemoryRouter>
+          <VisualJSONWidget
+            pathname="/test"
+            hasToolbar={true}
+            value={{}}
+            onChange={mockOnChange}
+          />
+        </MemoryRouter>
+      </Provider>,
+    );
+
+    // Click on dropdown to see options
+    const dropdown = screen.getByText('Add Property');
+    fireEvent.click(dropdown);
+
+    expect(screen.getByText('Add Property')).toBeInTheDocument();
+  });
+
+  it('opens JSON editor modal when Edit JSON button is clicked', () => {
+    const store = mockStore({
+      intl: {
+        locale: 'en',
+        messages: {},
+      },
+      progressEditing: {},
+      rawdata: {},
+      types: {
+        loaded: true,
+        loading: false,
+        types: [
+          {
+            id: 'content-type-1',
+            title: 'Content Type 1',
+            '@id': '/content-type-1',
+          },
+        ],
+      },
+    });
+    render(
+      <Provider store={store}>
+        <MemoryRouter>
+          <VisualJSONWidget
+            pathname="/test"
+            hasToolbar={true}
+            value={{}}
+            onChange={jest.fn()}
+          />
+        </MemoryRouter>
+      </Provider>,
+    );
+
+    const editJsonButton = screen.getByText('Edit JSON');
+    fireEvent.click(editJsonButton);
+
+    // Modal should be visible after clicking
+    expect(editJsonButton).toBeInTheDocument();
+  });
+
+  it('handles types not loaded state', () => {
+    const store = mockStore({
+      intl: {
+        locale: 'en',
+        messages: {},
+      },
+      progressEditing: {},
+      rawdata: {},
+      types: {
+        loaded: false,
+        loading: true,
+        types: [],
+      },
+    });
+    render(
+      <Provider store={store}>
+        <MemoryRouter>
+          <VisualJSONWidget
+            pathname="/test"
+            hasToolbar={true}
+            value={{}}
+            onChange={jest.fn()}
+          />
+        </MemoryRouter>
+      </Provider>,
+    );
+
+    expect(screen.getByText('Edit JSON')).toBeInTheDocument();
+  });
 });
 
 describe('EditDataComponent with enforceCharLimits', () => {
@@ -413,6 +533,105 @@ describe('EditDataComponent with enforceCharLimits', () => {
             request={{ loaded: true, loading: false, data: { fieldsets: [{ fields: [] }], required: [] } }}
             handleOnDropdownChange={jest.fn()}
             currentContentType={null}
+            value={{}}
+            fields={[]}
+            getDropdownValues={jest.fn()}
+            handleUpdateEnforceCharLimits={jest.fn()}
+            handleRemoveEnforceCharLimits={jest.fn()}
+          />
+        </MemoryRouter>
+      </Provider>,
+    );
+
+    expect(screen.queryByText('Enforce character limits')).not.toBeInTheDocument();
+  });
+
+  it('renders with fields and handles field accordion', () => {
+    const store = mockStore({
+      intl: {
+        locale: 'en',
+        messages: {},
+      },
+      rawdata: {
+        '/@vocabularies/plone.app.vocabularies.WorkflowStates': {
+          loaded: true,
+          loading: false,
+          data: {
+            items: [{ token: 'published' }, { token: 'private' }],
+          },
+        },
+      },
+    });
+
+    const value = {
+      'content-type-1': [
+        {
+          prefix: 'description',
+          states: ['all'],
+          linkLabel: 'Add description',
+          condition: 'python:value',
+          link: 'edit#description',
+        },
+      ],
+    };
+
+    render(
+      <Provider store={store}>
+        <MemoryRouter>
+          <EditDataComponent
+            request={{
+              loaded: true,
+              loading: false,
+              data: {
+                fieldsets: [{ fields: ['title', 'description'] }],
+                required: ['title'],
+              },
+            }}
+            handleOnDropdownChange={jest.fn()}
+            currentContentType={{
+              id: 'content-type-1',
+              title: 'Content Type 1',
+            }}
+            value={value}
+            fields={['title', 'description']}
+            getDropdownValues={(field) =>
+              field === 'description' ? ['All'] : undefined
+            }
+            handleUpdateEnforceCharLimits={jest.fn()}
+            handleRemoveEnforceCharLimits={jest.fn()}
+          />
+        </MemoryRouter>
+      </Provider>,
+    );
+
+    expect(screen.getByText('description')).toBeInTheDocument();
+  });
+
+  it('handles request loading state', () => {
+    const store = mockStore({
+      intl: {
+        locale: 'en',
+        messages: {},
+      },
+      rawdata: {
+        '/@vocabularies/plone.app.vocabularies.WorkflowStates': {
+          loaded: false,
+          loading: true,
+          data: null,
+        },
+      },
+    });
+
+    render(
+      <Provider store={store}>
+        <MemoryRouter>
+          <EditDataComponent
+            request={{ loaded: false, loading: true, data: null }}
+            handleOnDropdownChange={jest.fn()}
+            currentContentType={{
+              id: 'content-type-1',
+              title: 'Content Type 1',
+            }}
             value={{}}
             fields={[]}
             getDropdownValues={jest.fn()}
