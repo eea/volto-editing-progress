@@ -10,6 +10,9 @@ import '@testing-library/jest-dom/extend-expect';
 import VisualJSONWidget from './VisualJSONWidget';
 import EditDataComponent from './WidgetDataComponent';
 import ScrollIntoView from './ScrollIntoView';
+import { getEditingProgress, getRawContent } from './actions';
+import { editingProgress, rawdata } from './reducers';
+import { JSONSchema } from './schema';
 
 const mockStore = configureStore();
 const propsEmpty = {};
@@ -898,5 +901,113 @@ describe('ScrollIntoView', () => {
 
     // Should not throw or do anything
     expect(true).toBe(true);
+  });
+});
+
+describe('Actions', () => {
+  it('getEditingProgress returns correct action', () => {
+    const result = getEditingProgress('/test/item');
+    expect(result.type).toBe('EDITING_PROGRESS');
+    expect(result.request.path).toBe('/test/item/@editing.progress');
+  });
+
+  it('getRawContent returns correct action', () => {
+    const result = getRawContent('/test/url');
+    expect(result.type).toBe('GET_RAW_CONTENT');
+    expect(result.request.path).toBe('/test/url');
+    expect(result.url).toBe('/test/url');
+  });
+
+  it('getRawContent accepts custom headers', () => {
+    const result = getRawContent('/test/url', { 'X-Custom': 'value' });
+    expect(result.request.headers).toEqual({ 'X-Custom': 'value' });
+  });
+});
+
+describe('Reducers', () => {
+  describe('editingProgress', () => {
+    it('returns initial state', () => {
+      const result = editingProgress(undefined, {});
+      expect(result.get.loaded).toBe(false);
+      expect(result.get.loading).toBe(false);
+    });
+
+    it('handles EDITING_PROGRESS_PENDING', () => {
+      const result = editingProgress(undefined, {
+        type: 'EDITING_PROGRESS_PENDING',
+      });
+      expect(result.editing.loading).toBe(true);
+      expect(result.editing.loaded).toBe(false);
+    });
+
+    it('handles EDITING_PROGRESS_SUCCESS', () => {
+      const result = editingProgress(undefined, {
+        type: 'EDITING_PROGRESS_SUCCESS',
+        result: { data: 'test' },
+      });
+      expect(result.editing.loading).toBe(false);
+      expect(result.editing.loaded).toBe(true);
+      expect(result.result).toEqual({ data: 'test' });
+    });
+
+    it('handles EDITING_PROGRESS_FAIL', () => {
+      const result = editingProgress(undefined, {
+        type: 'EDITING_PROGRESS_FAIL',
+        error: 'error message',
+      });
+      expect(result.editing.loading).toBe(false);
+      expect(result.editing.loaded).toBe(false);
+      expect(result.editing.error).toBe('error message');
+    });
+  });
+
+  describe('rawdata', () => {
+    it('returns initial state', () => {
+      const result = rawdata(undefined, {});
+      expect(result).toEqual({});
+    });
+
+    it('handles GET_RAW_CONTENT_PENDING', () => {
+      const result = rawdata({}, {
+        type: 'GET_RAW_CONTENT_PENDING',
+        url: '/test',
+      });
+      expect(result['/test'].loading).toBe(true);
+      expect(result['/test'].loaded).toBe(false);
+    });
+
+    it('handles GET_RAW_CONTENT_SUCCESS', () => {
+      const result = rawdata({}, {
+        type: 'GET_RAW_CONTENT_SUCCESS',
+        url: '/test',
+        result: { items: [] },
+      });
+      expect(result['/test'].loading).toBe(false);
+      expect(result['/test'].loaded).toBe(true);
+      expect(result['/test'].data).toEqual({ items: [] });
+    });
+
+    it('handles GET_RAW_CONTENT_FAIL', () => {
+      const result = rawdata({}, {
+        type: 'GET_RAW_CONTENT_FAIL',
+        url: '/test',
+        error: 'error',
+      });
+      expect(result['/test'].loading).toBe(false);
+      expect(result['/test'].loaded).toBe(false);
+      expect(result['/test'].error).toBe('error');
+    });
+  });
+});
+
+describe('JSONSchema', () => {
+  it('returns schema with json field', () => {
+    const mockIntl = {
+      formatMessage: jest.fn().mockReturnValue('JSON code'),
+    };
+    const result = JSONSchema({ intl: mockIntl });
+    expect(result.required).toContain('json');
+    expect(result.fieldsets[0].fields).toContain('json');
+    expect(result.properties.json.widget).toBe('jsonTextarea');
   });
 });
