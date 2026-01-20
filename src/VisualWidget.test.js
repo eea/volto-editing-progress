@@ -966,31 +966,40 @@ describe('Reducers', () => {
     });
 
     it('handles GET_RAW_CONTENT_PENDING', () => {
-      const result = rawdata({}, {
-        type: 'GET_RAW_CONTENT_PENDING',
-        url: '/test',
-      });
+      const result = rawdata(
+        {},
+        {
+          type: 'GET_RAW_CONTENT_PENDING',
+          url: '/test',
+        },
+      );
       expect(result['/test'].loading).toBe(true);
       expect(result['/test'].loaded).toBe(false);
     });
 
     it('handles GET_RAW_CONTENT_SUCCESS', () => {
-      const result = rawdata({}, {
-        type: 'GET_RAW_CONTENT_SUCCESS',
-        url: '/test',
-        result: { items: [] },
-      });
+      const result = rawdata(
+        {},
+        {
+          type: 'GET_RAW_CONTENT_SUCCESS',
+          url: '/test',
+          result: { items: [] },
+        },
+      );
       expect(result['/test'].loading).toBe(false);
       expect(result['/test'].loaded).toBe(true);
       expect(result['/test'].data).toEqual({ items: [] });
     });
 
     it('handles GET_RAW_CONTENT_FAIL', () => {
-      const result = rawdata({}, {
-        type: 'GET_RAW_CONTENT_FAIL',
-        url: '/test',
-        error: 'error',
-      });
+      const result = rawdata(
+        {},
+        {
+          type: 'GET_RAW_CONTENT_FAIL',
+          url: '/test',
+          error: 'error',
+        },
+      );
       expect(result['/test'].loading).toBe(false);
       expect(result['/test'].loaded).toBe(false);
       expect(result['/test'].error).toBe('error');
