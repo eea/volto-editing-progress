@@ -8,6 +8,7 @@ import { backgroundColor } from './WidgetSidebar';
 import '@testing-library/jest-dom/extend-expect';
 
 import VisualJSONWidget from './VisualJSONWidget';
+import EditDataComponent from './WidgetDataComponent';
 
 const mockStore = configureStore();
 const propsEmpty = {};
@@ -72,5 +73,196 @@ describe('Visual widget', () => {
       container.querySelector('input[placeholder="Search... "]'),
     ).toBeInTheDocument();
     expect(screen.getByText('Content Type 1')).toBeInTheDocument();
+  });
+
+  it('renders the VisualJSONWidget with enforceCharLimits option in dropdown', () => {
+    const store = mockStore({
+      intl: {
+        locale: 'en',
+        messages: {},
+      },
+      progressEditing: {},
+      rawdata: {
+        '/content-type-1': {
+          loaded: true,
+          loading: false,
+          data: {
+            fieldsets: [{ fields: ['title', 'description'] }],
+            required: ['title'],
+          },
+        },
+      },
+      types: {
+        loaded: true,
+        loading: false,
+        types: [
+          {
+            id: 'content-type-1',
+            title: 'Content Type 1',
+            '@id': '/content-type-1',
+          },
+        ],
+      },
+    });
+    render(
+      <Provider store={store}>
+        <MemoryRouter>
+          <VisualJSONWidget
+            pathname="/test"
+            hasToolbar={true}
+            value={{}}
+            onChange={jest.fn()}
+          />
+        </MemoryRouter>
+      </Provider>,
+    );
+
+    expect(screen.getByText('Add Property')).toBeInTheDocument();
+  });
+
+  it('handles enforceCharLimits rule in value', () => {
+    const store = mockStore({
+      intl: {
+        locale: 'en',
+        messages: {},
+      },
+      progressEditing: {},
+      rawdata: {
+        '/content-type-1': {
+          loaded: true,
+          loading: false,
+          data: {
+            fieldsets: [{ fields: ['title', 'description'] }],
+            required: ['title'],
+          },
+        },
+      },
+      types: {
+        loaded: true,
+        loading: false,
+        types: [
+          {
+            id: 'content-type-1',
+            title: 'Content Type 1',
+            '@id': '/content-type-1',
+          },
+        ],
+      },
+    });
+    const valueWithCharLimits = {
+      'content-type-1': [
+        {
+          type: 'enforceCharLimits',
+          states: ['all'],
+          linkLabel: 'Fix {title}',
+        },
+      ],
+    };
+    render(
+      <Provider store={store}>
+        <MemoryRouter>
+          <VisualJSONWidget
+            pathname="/test"
+            hasToolbar={true}
+            value={valueWithCharLimits}
+            onChange={jest.fn()}
+          />
+        </MemoryRouter>
+      </Provider>,
+    );
+
+    expect(screen.getByText('Add Property')).toBeInTheDocument();
+  });
+});
+
+describe('EditDataComponent with enforceCharLimits', () => {
+  it('renders enforceCharLimits section when rule exists', () => {
+    const store = mockStore({
+      intl: {
+        locale: 'en',
+        messages: {},
+      },
+      rawdata: {
+        '/@vocabularies/plone.app.vocabularies.WorkflowStates': {
+          loaded: true,
+          loading: false,
+          data: {
+            items: [
+              { token: 'published' },
+              { token: 'private' },
+            ],
+          },
+        },
+      },
+    });
+
+    const value = {
+      'content-type-1': [
+        {
+          type: 'enforceCharLimits',
+          states: ['all'],
+          linkLabel: 'Fix {title}',
+        },
+      ],
+    };
+
+    render(
+      <Provider store={store}>
+        <MemoryRouter>
+          <EditDataComponent
+            request={{ loaded: true, loading: false, data: { fieldsets: [{ fields: [] }], required: [] } }}
+            handleOnDropdownChange={jest.fn()}
+            currentContentType={{ id: 'content-type-1', title: 'Content Type 1' }}
+            value={value}
+            fields={[]}
+            getDropdownValues={jest.fn()}
+            handleUpdateEnforceCharLimits={jest.fn()}
+            handleRemoveEnforceCharLimits={jest.fn()}
+          />
+        </MemoryRouter>
+      </Provider>,
+    );
+
+    expect(screen.getByText('Enforce character limits')).toBeInTheDocument();
+  });
+
+  it('does not render enforceCharLimits section when rule does not exist', () => {
+    const store = mockStore({
+      intl: {
+        locale: 'en',
+        messages: {},
+      },
+      rawdata: {
+        '/@vocabularies/plone.app.vocabularies.WorkflowStates': {
+          loaded: true,
+          loading: false,
+          data: {
+            items: [
+              { token: 'published' },
+              { token: 'private' },
+            ],
+          },
+        },
+      },
+    });
+
+    render(
+      <Provider store={store}>
+        <MemoryRouter>
+          <EditDataComponent
+            request={{ loaded: true, loading: false, data: { fieldsets: [{ fields: [] }], required: [] } }}
+            handleOnDropdownChange={jest.fn()}
+            currentContentType={{ id: 'content-type-1', title: 'Content Type 1' }}
+            value={{}}
+            fields={[]}
+            getDropdownValues={jest.fn()}
+            handleUpdateEnforceCharLimits={jest.fn()}
+            handleRemoveEnforceCharLimits={jest.fn()}
+          />
+        </MemoryRouter>
+      </Provider>,
+    );
+
+    expect(screen.queryByText('Enforce character limits')).not.toBeInTheDocument();
   });
 });
