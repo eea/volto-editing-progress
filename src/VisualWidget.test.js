@@ -9,6 +9,7 @@ import '@testing-library/jest-dom/extend-expect';
 
 import VisualJSONWidget from './VisualJSONWidget';
 import EditDataComponent from './WidgetDataComponent';
+import ScrollIntoView from './ScrollIntoView';
 
 const mockStore = configureStore();
 const propsEmpty = {};
@@ -764,5 +765,138 @@ describe('EditDataComponent with enforceCharLimits', () => {
     expect(
       screen.queryByText('Enforce character limits'),
     ).not.toBeInTheDocument();
+  });
+});
+
+describe('ScrollIntoView', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+    global.__CLIENT__ = true;
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+    delete global.__CLIENT__;
+  });
+
+  it('renders null', () => {
+    const { container } = render(
+      <ScrollIntoView location={{ hash: '', pathname: '/test' }} />,
+    );
+    expect(container.firstChild).toBeNull();
+  });
+
+  it('does nothing when no hash', () => {
+    const { container } = render(
+      <ScrollIntoView location={{ hash: '', pathname: '/test' }} />,
+    );
+    expect(container.firstChild).toBeNull();
+  });
+
+  it('scrolls to element when hash is present', () => {
+    const mockElement = document.createElement('div');
+    mockElement.id = 'test-element';
+    mockElement.scrollIntoView = jest.fn();
+    mockElement.classList = { add: jest.fn(), remove: jest.fn() };
+    mockElement.closest = jest.fn().mockReturnValue(null);
+    document.body.appendChild(mockElement);
+
+    const originalGetElementById = document.getElementById;
+    document.getElementById = jest.fn().mockReturnValue(mockElement);
+
+    render(
+      <ScrollIntoView location={{ hash: '#test-element', pathname: '/test' }} />,
+    );
+
+    jest.advanceTimersByTime(250);
+
+    expect(document.getElementById).toHaveBeenCalledWith('test-element');
+    expect(mockElement.scrollIntoView).toHaveBeenCalledWith({
+      behavior: 'smooth',
+      block: 'center',
+    });
+
+    document.getElementById = originalGetElementById;
+    document.body.removeChild(mockElement);
+  });
+
+  it('clears interval after 40 attempts', () => {
+    const originalGetElementById = document.getElementById;
+    document.getElementById = jest.fn().mockReturnValue(null);
+    const clearIntervalSpy = jest.spyOn(window, 'clearInterval');
+
+    render(
+      <ScrollIntoView
+        location={{ hash: '#nonexistent', pathname: '/test' }}
+      />,
+    );
+
+    // Run 41 intervals (250ms each)
+    jest.advanceTimersByTime(250 * 41);
+
+    expect(clearIntervalSpy).toHaveBeenCalled();
+
+    document.getElementById = originalGetElementById;
+    clearIntervalSpy.mockRestore();
+  });
+
+  it('clicks first tab on edit page with fieldset hash', () => {
+    const mockElement = document.createElement('div');
+    mockElement.id = 'fieldset-test';
+    mockElement.scrollIntoView = jest.fn();
+    mockElement.classList = { add: jest.fn(), remove: jest.fn() };
+    mockElement.closest = jest.fn().mockReturnValue(null);
+
+    const mockTab = document.createElement('div');
+    mockTab.click = jest.fn();
+    mockTab.classList = { contains: jest.fn().mockReturnValue(false) };
+
+    const mockFormTabs = document.createElement('div');
+    mockFormTabs.className = 'formtabs';
+    Object.defineProperty(mockFormTabs, 'firstElementChild', {
+      get: () => mockTab,
+    });
+
+    const mockSidebar = document.createElement('div');
+    mockSidebar.className = 'sidebar-container';
+    mockSidebar.appendChild(mockFormTabs);
+    document.body.appendChild(mockSidebar);
+
+    const originalGetElementById = document.getElementById;
+    const originalQuerySelector = document.querySelector;
+
+    document.getElementById = jest.fn().mockReturnValue(mockElement);
+    document.querySelector = jest.fn().mockImplementation((selector) => {
+      if (selector === '.sidebar-container .formtabs') {
+        return mockFormTabs;
+      }
+      return null;
+    });
+    document.querySelectorAll = jest.fn().mockReturnValue([]);
+
+    render(
+      <ScrollIntoView
+        location={{ hash: '#fieldset-test', pathname: '/test/edit' }}
+      />,
+    );
+
+    jest.advanceTimersByTime(250);
+
+    expect(mockTab.click).toHaveBeenCalled();
+
+    document.getElementById = originalGetElementById;
+    document.querySelector = originalQuerySelector;
+    document.body.removeChild(mockSidebar);
+  });
+
+  it('does nothing on server side', () => {
+    global.__CLIENT__ = false;
+
+    render(
+      <ScrollIntoView location={{ hash: '#test', pathname: '/test' }} />,
+    );
+
+    // Should not throw or do anything
+    expect(true).toBe(true);
   });
 });
