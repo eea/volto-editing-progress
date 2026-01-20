@@ -2,7 +2,7 @@ import { makeFirstLetterCapital } from './WidgetDataComponent';
 import React from 'react';
 import { Provider } from 'react-intl-redux';
 import { MemoryRouter } from 'react-router-dom';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import configureStore from 'redux-mock-store';
 import SidebarComponent, { backgroundColor } from './WidgetSidebar';
 import '@testing-library/jest-dom/extend-expect';
@@ -10,6 +10,7 @@ import '@testing-library/jest-dom/extend-expect';
 import VisualJSONWidget from './VisualJSONWidget';
 import EditDataComponent from './WidgetDataComponent';
 import ScrollIntoView from './ScrollIntoView';
+import TextareaJSONWidget from './TextareaJSONWidget';
 import { getEditingProgress, getRawContent } from './actions';
 import { editingProgress, rawdata } from './reducers';
 import { JSONSchema } from './schema';
@@ -400,6 +401,144 @@ describe('Visual widget', () => {
 
     expect(screen.getByText('Edit JSON')).toBeInTheDocument();
   });
+
+  it('updates existing field rule when dropdown changes for existing field', () => {
+    const mockOnChange = jest.fn();
+    const existingValue = {
+      'content-type-1': [
+        {
+          prefix: 'description',
+          states: ['all'],
+          linkLabel: 'Add description',
+          condition: 'python:value',
+          link: 'edit#description',
+        },
+      ],
+    };
+    const store = mockStore({
+      intl: {
+        locale: 'en',
+        messages: {},
+      },
+      progressEditing: {},
+      rawdata: {
+        '/content-type-1': {
+          loaded: true,
+          loading: false,
+          data: {
+            fieldsets: [{ fields: ['title', 'description'] }],
+            required: ['title'],
+          },
+        },
+        '/@vocabularies/plone.app.vocabularies.WorkflowStates': {
+          loaded: true,
+          loading: false,
+          data: {
+            items: [{ token: 'published' }, { token: 'private' }],
+          },
+        },
+      },
+      types: {
+        loaded: true,
+        loading: false,
+        types: [
+          {
+            id: 'content-type-1',
+            title: 'Content Type 1',
+            '@id': '/content-type-1',
+          },
+        ],
+      },
+    });
+    render(
+      <Provider store={store}>
+        <MemoryRouter>
+          <VisualJSONWidget
+            pathname="/test"
+            hasToolbar={true}
+            value={existingValue}
+            onChange={mockOnChange}
+          />
+        </MemoryRouter>
+      </Provider>,
+    );
+
+    // The description field should be visible
+    expect(screen.getByText('description')).toBeInTheDocument();
+  });
+
+  it('handles field with multiple rules where prefix does not match', () => {
+    const mockOnChange = jest.fn();
+    const existingValue = {
+      'content-type-1': [
+        {
+          prefix: 'other_field',
+          states: ['all'],
+          linkLabel: 'Other',
+          condition: 'python:value',
+          link: 'edit#other',
+        },
+        {
+          prefix: 'description',
+          states: ['published'],
+          linkLabel: 'Add description',
+          condition: 'python:value',
+          link: 'edit#description',
+        },
+      ],
+    };
+    const store = mockStore({
+      intl: {
+        locale: 'en',
+        messages: {},
+      },
+      progressEditing: {},
+      rawdata: {
+        '/content-type-1': {
+          loaded: true,
+          loading: false,
+          data: {
+            fieldsets: [{ fields: ['title', 'description', 'other_field'] }],
+            required: ['title'],
+          },
+        },
+        '/@vocabularies/plone.app.vocabularies.WorkflowStates': {
+          loaded: true,
+          loading: false,
+          data: {
+            items: [{ token: 'published' }, { token: 'private' }],
+          },
+        },
+      },
+      types: {
+        loaded: true,
+        loading: false,
+        types: [
+          {
+            id: 'content-type-1',
+            title: 'Content Type 1',
+            '@id': '/content-type-1',
+          },
+        ],
+      },
+    });
+    render(
+      <Provider store={store}>
+        <MemoryRouter>
+          <VisualJSONWidget
+            pathname="/test"
+            hasToolbar={true}
+            value={existingValue}
+            onChange={mockOnChange}
+          />
+        </MemoryRouter>
+      </Provider>,
+    );
+
+    // Both fields should be visible
+    expect(screen.getByText('description')).toBeInTheDocument();
+    expect(screen.getByText('other_field')).toBeInTheDocument();
+  });
 });
 
 describe('EditDataComponent with enforceCharLimits', () => {
@@ -769,6 +908,213 @@ describe('EditDataComponent with enforceCharLimits', () => {
       screen.queryByText('Enforce character limits'),
     ).not.toBeInTheDocument();
   });
+
+  it('handles message input change for field', () => {
+    const mockHandleOnDropdownChange = jest.fn();
+    const store = mockStore({
+      intl: {
+        locale: 'en',
+        messages: {},
+      },
+      rawdata: {
+        '/@vocabularies/plone.app.vocabularies.WorkflowStates': {
+          loaded: true,
+          loading: false,
+          data: {
+            items: [{ token: 'published' }, { token: 'private' }],
+          },
+        },
+      },
+    });
+
+    const value = {
+      'content-type-1': [
+        {
+          prefix: 'description',
+          states: ['all'],
+          linkLabel: 'Add description',
+          condition: 'python:value',
+          link: 'edit#description',
+        },
+      ],
+    };
+
+    render(
+      <Provider store={store}>
+        <MemoryRouter>
+          <EditDataComponent
+            request={{
+              loaded: true,
+              loading: false,
+              data: {
+                fieldsets: [{ fields: ['description'] }],
+                required: [],
+              },
+            }}
+            handleOnDropdownChange={mockHandleOnDropdownChange}
+            currentContentType={{
+              id: 'content-type-1',
+              title: 'Content Type 1',
+            }}
+            value={value}
+            fields={['description']}
+            getDropdownValues={(field) =>
+              field === 'description' ? ['All'] : undefined
+            }
+            handleUpdateEnforceCharLimits={jest.fn()}
+            handleRemoveEnforceCharLimits={jest.fn()}
+          />
+        </MemoryRouter>
+      </Provider>,
+    );
+
+    // Click on field accordion to expand
+    fireEvent.click(screen.getByText('description'));
+
+    // Change message input
+    const messageInput = document.querySelector('input[name="message"]');
+    fireEvent.change(messageInput, { target: { value: 'New message' } });
+
+    expect(mockHandleOnDropdownChange).toHaveBeenCalled();
+  });
+
+  it('handles link input change for field', () => {
+    const mockHandleOnDropdownChange = jest.fn();
+    const store = mockStore({
+      intl: {
+        locale: 'en',
+        messages: {},
+      },
+      rawdata: {
+        '/@vocabularies/plone.app.vocabularies.WorkflowStates': {
+          loaded: true,
+          loading: false,
+          data: {
+            items: [{ token: 'published' }],
+          },
+        },
+      },
+    });
+
+    const value = {
+      'content-type-1': [
+        {
+          prefix: 'description',
+          states: ['all'],
+          linkLabel: 'Add',
+          condition: 'python:value',
+          link: 'edit#desc',
+        },
+      ],
+    };
+
+    render(
+      <Provider store={store}>
+        <MemoryRouter>
+          <EditDataComponent
+            request={{
+              loaded: true,
+              loading: false,
+              data: {
+                fieldsets: [{ fields: ['description'] }],
+                required: [],
+              },
+            }}
+            handleOnDropdownChange={mockHandleOnDropdownChange}
+            currentContentType={{
+              id: 'content-type-1',
+              title: 'Content Type 1',
+            }}
+            value={value}
+            fields={['description']}
+            getDropdownValues={(field) =>
+              field === 'description' ? ['All'] : undefined
+            }
+            handleUpdateEnforceCharLimits={jest.fn()}
+            handleRemoveEnforceCharLimits={jest.fn()}
+          />
+        </MemoryRouter>
+      </Provider>,
+    );
+
+    // Click on field accordion to expand
+    fireEvent.click(screen.getByText('description'));
+
+    // Change link input
+    const linkInput = document.querySelector('input[name="link"]');
+    fireEvent.change(linkInput, { target: { value: 'new-link' } });
+
+    expect(mockHandleOnDropdownChange).toHaveBeenCalled();
+  });
+
+  it('handles condition input change for field', () => {
+    const mockHandleOnDropdownChange = jest.fn();
+    const store = mockStore({
+      intl: {
+        locale: 'en',
+        messages: {},
+      },
+      rawdata: {
+        '/@vocabularies/plone.app.vocabularies.WorkflowStates': {
+          loaded: true,
+          loading: false,
+          data: {
+            items: [{ token: 'published' }],
+          },
+        },
+      },
+    });
+
+    const value = {
+      'content-type-1': [
+        {
+          prefix: 'description',
+          states: ['all'],
+          linkLabel: 'Add',
+          condition: 'python:value',
+          link: 'edit#desc',
+        },
+      ],
+    };
+
+    render(
+      <Provider store={store}>
+        <MemoryRouter>
+          <EditDataComponent
+            request={{
+              loaded: true,
+              loading: false,
+              data: {
+                fieldsets: [{ fields: ['description'] }],
+                required: [],
+              },
+            }}
+            handleOnDropdownChange={mockHandleOnDropdownChange}
+            currentContentType={{
+              id: 'content-type-1',
+              title: 'Content Type 1',
+            }}
+            value={value}
+            fields={['description']}
+            getDropdownValues={(field) =>
+              field === 'description' ? ['All'] : undefined
+            }
+            handleUpdateEnforceCharLimits={jest.fn()}
+            handleRemoveEnforceCharLimits={jest.fn()}
+          />
+        </MemoryRouter>
+      </Provider>,
+    );
+
+    // Click on field accordion to expand
+    fireEvent.click(screen.getByText('description'));
+
+    // Change condition input
+    const conditionInput = document.querySelector('input[name="condition"]');
+    fireEvent.change(conditionInput, { target: { value: 'python:True' } });
+
+    expect(mockHandleOnDropdownChange).toHaveBeenCalled();
+  });
 });
 
 describe('ScrollIntoView', () => {
@@ -1007,5 +1353,144 @@ describe('JSONSchema', () => {
     expect(result.required).toContain('json');
     expect(result.fieldsets[0].fields).toContain('json');
     expect(result.properties.json.widget).toBe('jsonTextarea');
+  });
+});
+
+describe('TextareaJSONWidget', () => {
+  const store = mockStore({
+    intl: {
+      locale: 'en',
+      messages: {},
+    },
+  });
+
+  it('renders with initial value', () => {
+    render(
+      <Provider store={store}>
+        <TextareaJSONWidget
+          id="test-json"
+          title="Test JSON"
+          value={{ key: 'value' }}
+          onChange={jest.fn()}
+        />
+      </Provider>,
+    );
+
+    const textarea = document.querySelector('textarea');
+    expect(textarea).toBeInTheDocument();
+    expect(textarea.value).toContain('"key"');
+  });
+
+  it('handles valid JSON input', () => {
+    const mockOnChange = jest.fn();
+    render(
+      <Provider store={store}>
+        <TextareaJSONWidget
+          id="test-json"
+          title="Test JSON"
+          value={{ initial: 'value' }}
+          onChange={mockOnChange}
+        />
+      </Provider>,
+    );
+
+    const textarea = document.querySelector('textarea');
+    fireEvent.change(textarea, {
+      target: { value: '{"new": "json"}' },
+    });
+
+    expect(mockOnChange).toHaveBeenCalledWith('test-json', { new: 'json' });
+  });
+
+  it('handles invalid JSON input and shows error', () => {
+    jest.useFakeTimers();
+    const mockOnChange = jest.fn();
+    render(
+      <Provider store={store}>
+        <TextareaJSONWidget
+          id="test-json"
+          title="Test JSON"
+          value={{ initial: 'value' }}
+          onChange={mockOnChange}
+        />
+      </Provider>,
+    );
+
+    const textarea = document.querySelector('textarea');
+    fireEvent.change(textarea, {
+      target: { value: 'invalid json {' },
+    });
+
+    // Should call onChange with previous value
+    expect(mockOnChange).toHaveBeenCalledWith('test-json', {
+      initial: 'value',
+    });
+
+    // Error message should appear
+    expect(screen.getByText('Please enter valid JSON!')).toBeInTheDocument();
+
+    // Error should disappear after 1.5 seconds
+    act(() => {
+      jest.advanceTimersByTime(1500);
+    });
+
+    jest.useRealTimers();
+  });
+
+  it('handles empty string input as undefined', () => {
+    const mockOnChange = jest.fn();
+    render(
+      <Provider store={store}>
+        <TextareaJSONWidget
+          id="test-json"
+          title="Test JSON"
+          value={{ initial: 'value' }}
+          onChange={mockOnChange}
+        />
+      </Provider>,
+    );
+
+    const textarea = document.querySelector('textarea');
+    fireEvent.change(textarea, {
+      target: { value: '' },
+    });
+
+    // Empty string triggers invalid JSON path with previous value
+    expect(mockOnChange).toHaveBeenCalledWith('test-json', {
+      initial: 'value',
+    });
+  });
+
+  it('handles string value prop', () => {
+    render(
+      <Provider store={store}>
+        <TextareaJSONWidget
+          id="test-json"
+          title="Test JSON"
+          value='{"stringified": "value"}'
+          onChange={jest.fn()}
+        />
+      </Provider>,
+    );
+
+    const textarea = document.querySelector('textarea');
+    expect(textarea.value).toContain('"stringified"');
+  });
+
+  it('renders disabled state', () => {
+    render(
+      <Provider store={store}>
+        <TextareaJSONWidget
+          id="test-json"
+          title="Test JSON"
+          value={{ key: 'value' }}
+          onChange={jest.fn()}
+          isDisabled={true}
+        />
+      </Provider>,
+    );
+
+    const textarea = document.querySelector('textarea');
+    expect(textarea).toBeDisabled();
   });
 });
