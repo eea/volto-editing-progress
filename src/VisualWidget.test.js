@@ -4,7 +4,7 @@ import { Provider } from 'react-intl-redux';
 import { MemoryRouter } from 'react-router-dom';
 import { render, screen, fireEvent } from '@testing-library/react';
 import configureStore from 'redux-mock-store';
-import { backgroundColor } from './WidgetSidebar';
+import SidebarComponent, { backgroundColor } from './WidgetSidebar';
 import '@testing-library/jest-dom/extend-expect';
 
 import VisualJSONWidget from './VisualJSONWidget';
@@ -29,6 +29,109 @@ describe('Widget Sidebar', () => {
   });
   it('should return a background lightpink', () => {
     expect(backgroundColor(false, true)).toEqual('lightpink');
+  });
+  it('should return undefined when no conditions match', () => {
+    expect(backgroundColor(false, false)).toEqual(undefined);
+  });
+
+  it('renders SidebarComponent and filters types on input change', () => {
+    const types = {
+      loaded: true,
+      loading: false,
+      types: [
+        { id: 'document', title: 'Document' },
+        { id: 'news-item', title: 'News Item' },
+        { id: 'event', title: 'Event' },
+      ],
+    };
+    const handleChange = jest.fn();
+
+    render(
+      <SidebarComponent
+        types={types}
+        currentContentType={{ id: 'document', title: 'Document' }}
+        handleChangeSelectedContentType={handleChange}
+        value={{}}
+      />,
+    );
+
+    // All types should be visible initially
+    expect(screen.getByText('Document')).toBeInTheDocument();
+    expect(screen.getByText('News Item')).toBeInTheDocument();
+    expect(screen.getByText('Event')).toBeInTheDocument();
+
+    // Type in search input to filter
+    const input = document.querySelector('input[placeholder="Search... "]');
+    fireEvent.change(input, { target: { value: 'News' } });
+
+    // Only News Item should match
+    expect(screen.getByText('News Item')).toBeInTheDocument();
+    expect(screen.queryByText('Event')).not.toBeInTheDocument();
+  });
+
+  it('handles click on list item', () => {
+    const types = {
+      loaded: true,
+      loading: false,
+      types: [{ id: 'document', title: 'Document' }],
+    };
+    const handleChange = jest.fn();
+
+    render(
+      <SidebarComponent
+        types={types}
+        currentContentType={null}
+        handleChangeSelectedContentType={handleChange}
+        value={{ document: [] }}
+      />,
+    );
+
+    fireEvent.click(screen.getByText('Document'));
+    expect(handleChange).toHaveBeenCalled();
+  });
+
+  it('handles null input value', () => {
+    const types = {
+      loaded: true,
+      loading: false,
+      types: [{ id: 'document', title: 'Document' }],
+    };
+
+    render(
+      <SidebarComponent
+        types={types}
+        currentContentType={null}
+        handleChangeSelectedContentType={jest.fn()}
+        value={{}}
+      />,
+    );
+
+    const input = document.querySelector('input[placeholder="Search... "]');
+    fireEvent.change(input, { target: { value: null } });
+
+    // Should still show all types
+    expect(screen.getByText('Document')).toBeInTheDocument();
+  });
+
+  it('handles types not loaded', () => {
+    const types = {
+      loaded: false,
+      loading: true,
+      types: [],
+    };
+
+    render(
+      <SidebarComponent
+        types={types}
+        currentContentType={null}
+        handleChangeSelectedContentType={jest.fn()}
+        value={{}}
+      />,
+    );
+
+    expect(
+      document.querySelector('input[placeholder="Search... "]'),
+    ).toBeInTheDocument();
   });
 });
 
