@@ -11,17 +11,17 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: \n"
 
+#. Default: "Edit JSON"
 #: VisualJSONWidget
-# defaultMessage: Edit JSON
 msgid "Edit JSON"
 msgstr ""
 
+#. Default: "JSON code"
 #: schema
-# defaultMessage: JSON code
 msgid "JSON code"
 msgstr ""
 
+#. Default: "Please enter valid JSON!"
 #: TextareaJSONWidget
-# defaultMessage: Please enter valid JSON!
 msgid "Please enter valid JSON!"
 msgstr ""
