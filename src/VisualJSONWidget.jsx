@@ -194,6 +194,65 @@ const VisualJSONWidget = (props) => {
     return undefined;
   };
 
+  // Check if enforceCharLimits already exists for current content type
+  const hasEnforceCharLimits = () => {
+    if (!currentContentType || !value[currentContentType.id]) return false;
+    return value[currentContentType.id].some(
+      (rule) => rule.type === 'enforceCharLimits',
+    );
+  };
+
+  // Handler to add enforceCharLimits rule
+  const handleAddEnforceCharLimits = () => {
+    const localCopyOfValue = _.cloneDeep(value);
+    if (!localCopyOfValue[currentContentType.id]) {
+      localCopyOfValue[currentContentType.id] = [];
+    }
+
+    // Check if already exists
+    const exists = localCopyOfValue[currentContentType.id].some(
+      (r) => r.type === 'enforceCharLimits',
+    );
+
+    if (!exists) {
+      localCopyOfValue[currentContentType.id].push({
+        type: 'enforceCharLimits',
+        states: ['all'],
+        linkLabel: 'Fix {title}',
+      });
+      onChange(id, localCopyOfValue);
+    }
+  };
+
+  // Handler to update enforceCharLimits rule
+  const handleUpdateEnforceCharLimits = (key, newValue) => {
+    const localCopyOfValue = _.cloneDeep(value);
+    const rules = localCopyOfValue[currentContentType.id] || [];
+    const ruleIndex = rules.findIndex((r) => r.type === 'enforceCharLimits');
+
+    if (ruleIndex !== -1) {
+      if (key === 'states') {
+        rules[ruleIndex].states = newValue.map((s) => s.toLowerCase());
+      } else {
+        rules[ruleIndex][key] = newValue;
+      }
+      onChange(id, localCopyOfValue);
+    }
+  };
+
+  // Handler to remove enforceCharLimits rule
+  const handleRemoveEnforceCharLimits = () => {
+    const localCopyOfValue = _.cloneDeep(value);
+    const rules = localCopyOfValue[currentContentType.id] || [];
+    localCopyOfValue[currentContentType.id] = rules.filter(
+      (r) => r.type !== 'enforceCharLimits',
+    );
+    if (localCopyOfValue[currentContentType.id].length === 0) {
+      delete localCopyOfValue[currentContentType.id];
+    }
+    onChange(id, localCopyOfValue);
+  };
+
   return (
     <>
       <div>
@@ -217,18 +276,35 @@ const VisualJSONWidget = (props) => {
             <Dropdown
               className="ui grey button dropdown-button"
               text="Add Property"
-              options={fields
-                .filter((field) => {
-                  return (
-                    getDropdownValues(field) === undefined &&
-                    !request.data.required.includes(field)
-                  );
-                })
-                .map((field) => {
-                  return { key: field, text: field, value: field };
-                })}
+              options={[
+                // Existing field options
+                ...fields
+                  .filter((field) => {
+                    return (
+                      getDropdownValues(field) === undefined &&
+                      !request.data.required.includes(field)
+                    );
+                  })
+                  .map((field) => {
+                    return { key: field, text: field, value: field };
+                  }),
+                // Add enforceCharLimits option if not already added
+                ...(!hasEnforceCharLimits()
+                  ? [
+                      {
+                        key: 'enforceCharLimits',
+                        text: 'Enforce character limits',
+                        value: 'enforceCharLimits',
+                      },
+                    ]
+                  : []),
+              ]}
               onChange={(e, t) => {
-                handleOnDropdownChange(e, { value: ['all'] }, t.value);
+                if (t.value === 'enforceCharLimits') {
+                  handleAddEnforceCharLimits();
+                } else {
+                  handleOnDropdownChange(e, { value: ['all'] }, t.value);
+                }
               }}
             />
           )}
@@ -250,6 +326,8 @@ const VisualJSONWidget = (props) => {
             value={value}
             fields={fields}
             getDropdownValues={getDropdownValues}
+            handleUpdateEnforceCharLimits={handleUpdateEnforceCharLimits}
+            handleRemoveEnforceCharLimits={handleRemoveEnforceCharLimits}
           />
         </Sidebar.Pusher>
       </Sidebar.Pushable>

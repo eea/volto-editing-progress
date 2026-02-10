@@ -18,6 +18,8 @@ const EditDataComponent = ({
   value,
   fields,
   getDropdownValues,
+  handleUpdateEnforceCharLimits,
+  handleRemoveEnforceCharLimits,
 }) => {
   const path = flattenToAppURL(
     '/@vocabularies/plone.app.vocabularies.WorkflowStates',
@@ -74,6 +76,16 @@ const EditDataComponent = ({
       value: makeFirstLetterCapital(state),
     }));
   };
+
+  // Get enforceCharLimits rule if it exists
+  const getEnforceCharLimitsRule = () => {
+    if (!currentContentType || !value[currentContentType.id]) return null;
+    return value[currentContentType.id].find(
+      (rule) => rule.type === 'enforceCharLimits',
+    );
+  };
+
+  const enforceCharLimitsRule = getEnforceCharLimitsRule();
   const [activeIndex, setActiveIndex] = useState(0);
   // const inputRef = useRef();
   const [inputValue, setInputValue] = useState('');
@@ -129,6 +141,91 @@ const EditDataComponent = ({
       }}
     >
       <Accordion styled fluid>
+        {/* Enforce Character Limits section */}
+        {enforceCharLimitsRule &&
+          requestStateOptions?.loaded &&
+          !requestStateOptions?.loading &&
+          requestStateOptions?.data && (
+            <React.Fragment key="enforceCharLimits">
+              <Accordion.Title
+                active={activeIndex === 'charLimits'}
+                index="charLimits"
+                onClick={() =>
+                  setActiveIndex(
+                    activeIndex === 'charLimits' ? -1 : 'charLimits',
+                  )
+                }
+                id="property_enforceCharLimits"
+              >
+                <div className="title-editing-progress">
+                  <Icon name="dropdown" size="tiny" />
+                  &nbsp; Enforce character limits
+                </div>
+                <div className="title-editing-progress">
+                  <Icon
+                    name="cancel"
+                    size="mini"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleRemoveEnforceCharLimits();
+                    }}
+                  />
+                </div>
+              </Accordion.Title>
+              <Accordion.Content
+                active={activeIndex === 'charLimits'}
+                id="property_content_enforceCharLimits"
+              >
+                <label
+                  htmlFor="charLimitsLinkLabel"
+                  style={{ display: 'block', padding: '10px' }}
+                >
+                  Link Label (use {'{title}'} as placeholder)
+                </label>
+                <input
+                  className="message-input"
+                  value={enforceCharLimitsRule.linkLabel || ''}
+                  onChange={(e) =>
+                    handleUpdateEnforceCharLimits('linkLabel', e.target.value)
+                  }
+                  name="charLimitsLinkLabel"
+                  style={{ padding: '10px' }}
+                  placeholder="Fix {title}"
+                />
+                <label
+                  htmlFor="charLimitsStates"
+                  style={{ display: 'block', padding: '10px' }}
+                >
+                  States
+                </label>
+                <Dropdown
+                  placeholder="States"
+                  multiple
+                  floating
+                  selection
+                  search
+                  name="charLimitsStates"
+                  value={
+                    enforceCharLimitsRule.states?.map((s) =>
+                      makeFirstLetterCapital(s),
+                    ) || ['All']
+                  }
+                  options={createStateOption(
+                    requestStateOptions.data.items.map(
+                      (option) => option.token,
+                    ),
+                  )}
+                  onChange={(e, data) =>
+                    handleUpdateEnforceCharLimits('states', data.value)
+                  }
+                  renderLabel={renderLabel}
+                />
+              </Accordion.Content>
+            </React.Fragment>
+          )}
+
+        {/* Regular fields */}
         {request?.loaded &&
           !request?.loading &&
           requestStateOptions?.loaded &&
