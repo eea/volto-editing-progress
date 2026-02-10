@@ -11,7 +11,6 @@ import {
   Sidebar,
 } from 'semantic-ui-react';
 import { flattenToAppURL } from '@plone/volto/helpers';
-import './less/editor.less';
 import _ from 'lodash';
 import { FormattedMessage, defineMessages, injectIntl } from 'react-intl';
 import PropTypes from 'prop-types';
