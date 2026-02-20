@@ -3,16 +3,16 @@
 [![Releases](https://img.shields.io/github/v/release/eea/volto-editing-progress)](https://github.com/eea/volto-editing-progress/releases)
 
 [![Pipeline](https://ci.eionet.europa.eu/buildStatus/icon?job=volto-addons%2Fvolto-editing-progress%2Fmaster&subject=master)](https://ci.eionet.europa.eu/view/Github/job/volto-addons/job/volto-editing-progress/job/master/display/redirect)
-[![Lines of Code](https://sonarqube.eea.europa.eu/api/project_badges/measure?project=volto-editing-progress-master&metric=ncloc)](https://sonarqube.eea.europa.eu/dashboard?id=volto-editing-progress-master)
-[![Coverage](https://sonarqube.eea.europa.eu/api/project_badges/measure?project=volto-editing-progress-master&metric=coverage)](https://sonarqube.eea.europa.eu/dashboard?id=volto-editing-progress-master)
-[![Bugs](https://sonarqube.eea.europa.eu/api/project_badges/measure?project=volto-editing-progress-master&metric=bugs)](https://sonarqube.eea.europa.eu/dashboard?id=volto-editing-progress-master)
-[![Duplicated Lines (%)](https://sonarqube.eea.europa.eu/api/project_badges/measure?project=volto-editing-progress-master&metric=duplicated_lines_density)](https://sonarqube.eea.europa.eu/dashboard?id=volto-editing-progress-master)
+[![Lines of Code](https://sonarqube.eea.europa.eu/api/project_badges/measure?project=volto-editing-progress&metric=ncloc)](https://sonarqube.eea.europa.eu/dashboard?id=volto-editing-progress)
+[![Coverage](https://sonarqube.eea.europa.eu/api/project_badges/measure?project=volto-editing-progress&metric=coverage)](https://sonarqube.eea.europa.eu/dashboard?id=volto-editing-progress)
+[![Bugs](https://sonarqube.eea.europa.eu/api/project_badges/measure?project=volto-editing-progress&metric=bugs)](https://sonarqube.eea.europa.eu/dashboard?id=volto-editing-progress)
+[![Duplicated Lines (%)](https://sonarqube.eea.europa.eu/api/project_badges/measure?project=volto-editing-progress&metric=duplicated_lines_density)](https://sonarqube.eea.europa.eu/dashboard?id=volto-editing-progress)
 
 [![Pipeline](https://ci.eionet.europa.eu/buildStatus/icon?job=volto-addons%2Fvolto-editing-progress%2Fdevelop&subject=develop)](https://ci.eionet.europa.eu/view/Github/job/volto-addons/job/volto-editing-progress/job/develop/display/redirect)
-[![Lines of Code](https://sonarqube.eea.europa.eu/api/project_badges/measure?project=volto-editing-progress-develop&metric=ncloc)](https://sonarqube.eea.europa.eu/dashboard?id=volto-editing-progress-develop)
-[![Coverage](https://sonarqube.eea.europa.eu/api/project_badges/measure?project=volto-editing-progress-develop&metric=coverage)](https://sonarqube.eea.europa.eu/dashboard?id=volto-editing-progress-develop)
-[![Bugs](https://sonarqube.eea.europa.eu/api/project_badges/measure?project=volto-editing-progress-develop&metric=bugs)](https://sonarqube.eea.europa.eu/dashboard?id=volto-editing-progress-develop)
-[![Duplicated Lines (%)](https://sonarqube.eea.europa.eu/api/project_badges/measure?project=volto-editing-progress-develop&metric=duplicated_lines_density)](https://sonarqube.eea.europa.eu/dashboard?id=volto-editing-progress-develop)
+[![Lines of Code](https://sonarqube.eea.europa.eu/api/project_badges/measure?project=volto-editing-progress&branch=develop&metric=ncloc)](https://sonarqube.eea.europa.eu/dashboard?id=volto-editing-progress&branch=develop)
+[![Coverage](https://sonarqube.eea.europa.eu/api/project_badges/measure?project=volto-editing-progress&branch=develop&metric=coverage)](https://sonarqube.eea.europa.eu/dashboard?id=volto-editing-progress&branch=develop)
+[![Bugs](https://sonarqube.eea.europa.eu/api/project_badges/measure?project=volto-editing-progress&branch=develop&metric=bugs)](https://sonarqube.eea.europa.eu/dashboard?id=volto-editing-progress&branch=develop)
+[![Duplicated Lines (%)](https://sonarqube.eea.europa.eu/api/project_badges/measure?project=volto-editing-progress&branch=develop&metric=duplicated_lines_density)](https://sonarqube.eea.europa.eu/dashboard?id=volto-editing-progress&branch=develop)
 
 [Volto](https://github.com/plone/volto) add-on: Editing progress
 
