@@ -5,7 +5,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import configureStore from 'redux-mock-store';
 import SidebarComponent, { backgroundColor } from './WidgetSidebar';
-import '@testing-library/jest-dom/extend-expect';
+import '@testing-library/jest-dom';
 
 import VisualJSONWidget from './VisualJSONWidget';
 import EditDataComponent from './WidgetDataComponent';
