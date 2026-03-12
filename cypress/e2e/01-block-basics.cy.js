@@ -58,10 +58,7 @@ describe('Blocks Tests', () => {
     cy.get('.documentFirstHeading').contains('Test Progress');
     cy.get('#toolbar-save').click();
 
-    cy.get('#toolbar-personal').click();
-    cy.contains('Site Setup').click();
-
-    cy.contains('Editing Progress').click();
+    cy.visit('/controlpanel/progress.editing');
     cy.contains('Edit JSON').click();
 
     cy.get('#field-json').should('be.visible');
@@ -152,10 +149,7 @@ describe('Blocks Tests', () => {
       Cypress.config().baseUrl + '/cypress/my-page/test-progress',
     );
 
-    cy.get('#toolbar-personal').click();
-    cy.contains('Site Setup').click();
-
-    cy.contains('Editing Progress').click();
+    cy.visit('/controlpanel/progress.editing');
     cy.contains('Edit JSON').click();
     cy.get('#field-json').should('be.visible');
     cy.get('#field-json')

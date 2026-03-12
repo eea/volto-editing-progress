@@ -2,18 +2,17 @@
 describe('Editing progress', () => {
   before(() => {
     cy.autologin();
+    cy.removeContent('all-of-me', { failOnStatusCode: false });
+    cy.removeContentType('music', { failOnStatusCode: false });
     cy.addContentType('music');
     cy.visit('/controlpanel/dexterity-types/music/schema');
 
     cy.get('#addfield').click();
     cy.waitForResourceToLoad('Fields');
-    cy.get('.react-select__value-container').click({ force: true });
-    cy.wait(100);
-    cy.get('#react-select-4-option-17').click({ force: true });
-    cy.wait(100);
-    cy.get('#field-title:enabled').type('Name', { force: true });
-    cy.wait(100);
-    cy.get(".actions [aria-label='Save']").click();
+    cy.get('.ui.dimmer.modals.visible .modal').within(() => {
+      cy.get('#field-title:enabled').type('Name', { force: true });
+      cy.get(".actions [aria-label='Save']").click();
+    });
     cy.wait(100);
     cy.get('#toolbar-save').click();
     cy.waitForResourceToLoad('music');
@@ -31,8 +30,8 @@ describe('Editing progress', () => {
   });
   after(() => {
     cy.autologin();
-    cy.removeContent('all-of-me');
-    cy.removeContentType('music');
+    cy.removeContent('all-of-me', { failOnStatusCode: false });
+    cy.removeContentType('music', { failOnStatusCode: false });
   });
 
   it('should change background color', () => {

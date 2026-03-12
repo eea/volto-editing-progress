@@ -151,7 +151,7 @@ Cypress.Commands.add('addContentType', (name) => {
 });
 
 // --- Remove DX behavior ----------------------------------------------------------
-Cypress.Commands.add('removeContentType', (name) => {
+Cypress.Commands.add('removeContentType', (name, options = {}) => {
   let api_url, auth;
   api_url = Cypress.env('API_PATH') || 'http://localhost:8080/Plone';
   auth = {
@@ -162,6 +162,7 @@ Cypress.Commands.add('removeContentType', (name) => {
     .request({
       method: 'DELETE',
       url: `${api_url}/@controlpanels/dexterity-types/${name}`,
+      failOnStatusCode: options.failOnStatusCode ?? true,
       headers: {
         Accept: 'application/json',
       },
@@ -222,7 +223,7 @@ Cypress.Commands.add('removeSlateJSONField', (type, name) => {
 });
 
 // --- REMOVE CONTENT --------------------------------------------------------
-Cypress.Commands.add('removeContent', (path) => {
+Cypress.Commands.add('removeContent', (path, options = {}) => {
   let api_url, auth;
   api_url = Cypress.env('API_PATH') || 'http://localhost:8080/Plone';
   auth = {
@@ -233,6 +234,7 @@ Cypress.Commands.add('removeContent', (path) => {
     .request({
       method: 'DELETE',
       url: `${api_url}/${path}`,
+      failOnStatusCode: options.failOnStatusCode ?? true,
       headers: {
         Accept: 'application/json',
       },
