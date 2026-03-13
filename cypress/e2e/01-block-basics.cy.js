@@ -86,27 +86,24 @@ describe('Blocks Tests', () => {
 
     cy.navigate('/cypress/my-page');
 
-    cy.get('#toolbar-personal').click();
-    cy.contains('Site Setup').click();
-
-    cy.contains('Content Types').click();
-    cy.get('.ui.dropdown.actions-Document .ellipsis.horizontal.icon').click();
-
-    cy.get('.ui.active.visible.dropdown.actions-Document .item')
+    cy.visit('/controlpanel/dexterity-types');
+    cy.get('.ui.dropdown.actions-Document').click();
+    cy.get('.ui.dropdown.actions-Document .item')
       .contains('Schema')
-      .click();
+      .click({ force: true });
 
     cy.get('#addfield').click();
 
-    cy.get('.ui.form .ui.input #field-title')
-      .eq(1)
-      .click()
-      .type('test_progress');
+    cy.get('.ui.dimmer.modals.visible .modal').within(() => {
+      cy.get('#field-title:enabled').click({ force: true }).type('test_progress');
+    });
     cy.get('#field-factory').click().type('text');
     cy.get('.react-select__menu ').contains('Text').click({ force: true });
 
-    cy.get('.inline.field.field-wrapper-required input').click({ force: true });
-    cy.get('.actions button[title="Save"]').click();
+    cy.get('.ui.dimmer.modals.visible .modal').within(() => {
+      cy.get('.inline.field.field-wrapper-required input').click({ force: true });
+      cy.get('.actions button[title="Save"]').click();
+    });
 
     cy.get('.tabular.menu .item-add').click();
     cy.get('.modal .ui.input #field-title').click().type('Test Progress');
@@ -116,14 +113,18 @@ describe('Blocks Tests', () => {
     cy.get('.tabular.menu .item').contains('Test Progress').click();
     cy.get('#addfield').click();
 
-    cy.get('.ui.form .ui.input #field-title').click().type('test_progress_2');
+    cy.get('.ui.dimmer.modals.visible .modal').within(() => {
+      cy.get('#field-title:enabled').click({ force: true }).type('test_progress_2');
+    });
     cy.get('#field-factory').click().type('text');
     cy.get('.react-select__menu ').contains('Text').click({ force: true });
 
-    cy.get('.inline.field.field-wrapper-required input').click({
-      force: true,
+    cy.get('.ui.dimmer.modals.visible .modal').within(() => {
+      cy.get('.inline.field.field-wrapper-required input').click({
+        force: true,
+      });
+      cy.get('.actions button[title="Save"]').click();
     });
-    cy.get('.actions button[title="Save"]').click();
 
     cy.get('#toolbar-save').click();
 
@@ -166,15 +167,11 @@ describe('Blocks Tests', () => {
     cy.get('#toolbar-save').click();
     cy.navigate('/cypress/my-page');
 
-    cy.get('#toolbar-personal').click();
-    cy.contains('Site Setup').click();
-
-    cy.contains('Content Types').click();
-    cy.get('.ui.dropdown.actions-Document .ellipsis.horizontal.icon').click();
-
-    cy.get('.ui.active.visible.dropdown.actions-Document .item')
+    cy.visit('/controlpanel/dexterity-types');
+    cy.get('.ui.dropdown.actions-Document').click();
+    cy.get('.ui.dropdown.actions-Document .item')
       .contains('Schema')
-      .click();
+      .click({ force: true });
 
     cy.get(
       '.field-wrapper-test_progress .toolbar button[aria-label="Delete"]',
