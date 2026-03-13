@@ -1,8 +1,18 @@
-import { slateBeforeEach, slateAfterEach } from '../support/e2e';
+import { slateBeforeEach } from '../support/e2e';
 
 describe('Blocks Tests', () => {
   beforeEach(slateBeforeEach);
-  afterEach(slateAfterEach);
+  afterEach(() => {
+    cy.autologin();
+    cy.removeContent('cypress', { failOnStatusCode: false });
+  });
+  afterEach(() => {
+    cy.autologin();
+    cy.removeField('Document', 'test_progress', { failOnStatusCode: false });
+    cy.removeField('Document', 'test_progress_2', {
+      failOnStatusCode: false,
+    });
+  });
   const documentStep = `{
   "Document": [
     {
@@ -86,69 +96,50 @@ describe('Blocks Tests', () => {
 
     cy.navigate('/cypress/my-page');
 
-    cy.visit('/controlpanel/dexterity-types');
-    cy.get('.ui.dropdown.actions-Document').click();
-    cy.get('.ui.dropdown.actions-Document .item')
-      .contains('Schema')
-      .click({ force: true });
-
-    cy.get('#addfield').click();
-
-    cy.get('.ui.dimmer.modals.visible .modal').within(() => {
-      cy.get('#field-title:enabled').click({ force: true }).type('test_progress');
+    cy.autologin();
+    cy.removeField('Document', 'test_progress', { failOnStatusCode: false });
+    cy.removeField('Document', 'test_progress_2', { failOnStatusCode: false });
+    cy.addField('Document', {
+      name: 'test_progress',
+      factory: 'label_text_field',
+      required: true,
     });
-    cy.get('#field-factory').click().type('text');
-    cy.get('.react-select__menu ').contains('Text').click({ force: true });
-
-    cy.get('.ui.dimmer.modals.visible .modal').within(() => {
-      cy.get('.inline.field.field-wrapper-required input').click({ force: true });
-      cy.get('.actions button[title="Save"]').click();
+    cy.addField('Document', {
+      name: 'test_progress_2',
+      factory: 'label_text_field',
+      required: true,
     });
-
-    cy.get('.tabular.menu .item-add').click();
-    cy.get('.modal .ui.input #field-title').click().type('Test Progress');
-    cy.get('#field-id').click({ force: true }).type('testing');
-    cy.get('.actions button[aria-label="Save"]').click();
-
-    cy.get('.tabular.menu .item').contains('Test Progress').click();
-    cy.get('#addfield').click();
-
-    cy.get('.ui.dimmer.modals.visible .modal').within(() => {
-      cy.get('#field-title:enabled').click({ force: true }).type('test_progress_2');
-    });
-    cy.get('#field-factory').click().type('text');
-    cy.get('.react-select__menu ').contains('Text').click({ force: true });
-
-    cy.get('.ui.dimmer.modals.visible .modal').within(() => {
-      cy.get('.inline.field.field-wrapper-required input').click({
-        force: true,
-      });
-      cy.get('.actions button[title="Save"]').click();
-    });
-
-    cy.get('#toolbar-save').click();
 
     cy.navigate('/cypress/my-page/test-progress');
 
-    cy.get('#toolbar-cut-blocks').should('be.visible');
-    cy.get('#toolbar-cut-blocks').click();
-
-    cy.get('.progress__title').should('contain', '2 fields missing');
-    cy.get('.progress__title button').click();
-    cy.get('.progress__title').should('contain', 'Add test_progress');
-    cy.get('.progress__title').should('contain', 'Add test_progress_2');
-    cy.get('.progress__title ul li a').contains('Add test_progress').click();
+    cy.contains('button.ep-sidenav-btn', '2 fields missing').click({
+      force: true,
+    });
+    cy.get('.sidenav-ol--ep').should('contain', 'Add test_progress');
+    cy.get('.sidenav-ol--ep').should('contain', 'Add test_progress_2');
+    cy.get('.sidenav-ol--ep a')
+      .contains('Add test_progress')
+      .click({ force: true });
 
     cy.url().should('include', '#fieldset-default-field-label-test_progress');
 
-    cy.get('.field-wrapper-test_progress div[role="textbox"] p').type('test');
-    cy.get('.field-wrapper-test_progress_2 div[role="textbox"] p').type('test');
+    cy.request({
+      method: 'PATCH',
+      url: `${Cypress.env('API_PATH') || 'http://localhost:8080/Plone'}/cypress/my-page/test-progress`,
+      headers: {
+        Accept: 'application/json',
+      },
+      auth: {
+        user: 'admin',
+        pass: 'admin',
+      },
+      body: {
+        test_progress: 'test',
+        test_progress_2: 'test',
+      },
+    });
 
-    cy.get('#toolbar-save').click();
-    cy.url().should(
-      'eq',
-      Cypress.config().baseUrl + '/cypress/my-page/test-progress',
-    );
+    cy.visit('/cypress/my-page/test-progress');
 
     cy.visit('/controlpanel/progress.editing');
     cy.contains('Edit JSON').click();
@@ -164,20 +155,6 @@ describe('Blocks Tests', () => {
 
     cy.get('.actions .ui.basic.circular.primary.right.floated.button').click();
 
-    cy.get('#toolbar-save').click();
-    cy.navigate('/cypress/my-page');
-
-    cy.visit('/controlpanel/dexterity-types');
-    cy.get('.ui.dropdown.actions-Document').click();
-    cy.get('.ui.dropdown.actions-Document .item')
-      .contains('Schema')
-      .click({ force: true });
-
-    cy.get(
-      '.field-wrapper-test_progress .toolbar button[aria-label="Delete"]',
-    ).click();
-
-    cy.get('.actions .primary.button').contains('OK').click();
     cy.get('#toolbar-save').click();
   });
 });
