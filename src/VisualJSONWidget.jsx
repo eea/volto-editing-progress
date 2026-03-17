@@ -29,7 +29,7 @@ const messages = defineMessages({
 export const SIDEBAR_WIDTH = '250px';
 export const COMPONENT_HEIGHT = '750px';
 
-function isValidJson(json) {
+export function isValidJson(json) {
   try {
     JSON.parse(json);
     return true;
@@ -38,7 +38,7 @@ function isValidJson(json) {
   }
 }
 
-function addNewStateToAlreadyExistingField(
+export function addNewStateToAlreadyExistingField(
   currentContentTypeData,
   currentField,
   statesToAdd,
@@ -67,14 +67,14 @@ function addNewStateToAlreadyExistingField(
   }
 }
 
-function doesPrefixExistInCurrentContentTypeData(
+export function doesPrefixExistInCurrentContentTypeData(
   currentContentTypeData,
   currentField,
 ) {
   return currentContentTypeData.every((rule) => rule.prefix !== currentField);
 }
 
-function createFieldRule(currentField, statesToAdd) {
+export function createFieldRule(currentField, statesToAdd) {
   return {
     prefix: currentField,
     states: statesToAdd,
