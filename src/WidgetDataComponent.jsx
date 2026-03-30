@@ -34,6 +34,7 @@ const EditDataComponent = ({
       path &&
       !requestStateOptions?.loading &&
       !requestStateOptions?.loaded &&
+      !requestStateOptions?.error &&
       !content
     )
       dispatch(getRawContent(path));
@@ -46,6 +47,8 @@ const EditDataComponent = ({
     requestStateOptions?.loaded,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     requestStateOptions?.loading,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    requestStateOptions?.error,
   ]);
 
   //Returns the saved values for dropdown with the first letter in uppercase

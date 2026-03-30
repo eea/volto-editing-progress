@@ -1,5 +1,25 @@
 /* eslint-disable no-unused-expressions */
 describe('Editing progress', () => {
+  const selectContentType = (contentTypeId) => {
+    cy.get('input[placeholder="Search... "]')
+      .should('be.visible')
+      .clear()
+      .type(contentTypeId);
+
+    cy.get(`#sidebar_${contentTypeId}`)
+      .should('be.visible')
+      .scrollIntoView()
+      .click();
+
+    cy.get(`#sidebar_${contentTypeId}`).should(
+      'have.css',
+      'background-color',
+      'rgb(173, 216, 230)',
+    );
+
+    cy.get('.dropdown-button').should('be.visible');
+  };
+
   before(() => {
     cy.autologin();
     cy.removeContent('all-of-me', { failOnStatusCode: false });
@@ -22,6 +42,8 @@ describe('Editing progress', () => {
   beforeEach(() => {
     cy.autologin();
     cy.visit('/controlpanel/progress.editing');
+    cy.get('#json_button').should('be.visible');
+    cy.get('input[placeholder="Search... "]').should('be.visible');
   });
   after(() => {
     cy.autologin();
@@ -31,29 +53,18 @@ describe('Editing progress', () => {
   });
 
   it('should change background color', () => {
-    cy.get('#sidebar_music').click({ force: true });
-    cy.get('#sidebar_Collection').should(
-      'have.css',
-      'background-color',
-      'rgba(0, 0, 0, 0)',
-    );
-    cy.get('#sidebar_music').should(
-      'have.css',
-      'background-color',
-      'rgb(173, 216, 230)',
-    );
+    selectContentType('music');
   });
+
   it('should add and delete property', () => {
-    cy.get('#sidebar_music').click({ force: true });
-    cy.wait(100);
-    cy.get('.dropdown-button').click({ force: true });
-    cy.wait(100);
-    cy.get('span').contains('Enforce character limits').click({
-      force: true,
-    });
-    cy.get('#property_enforceCharLimits').should('be.visible').click({
-      force: true,
-    });
+    selectContentType('music');
+
+    cy.get('.dropdown-button').should('be.visible').click();
+    cy.contains('.visible.menu .item', 'Enforce character limits')
+      .should('be.visible')
+      .click();
+
+    cy.get('#property_enforceCharLimits').should('be.visible').click();
     cy.get('#property_content_enforceCharLimits')
       .should('be.visible')
       .within(() => {
@@ -63,16 +74,14 @@ describe('Editing progress', () => {
           .type('Fix {title}', { parseSpecialCharSequences: false });
       });
 
-    cy.get('#sidebar_music').click({ force: true });
-    cy.wait(100);
-    cy.get('#property_enforceCharLimits .cancel.mini.icon').click({
-      force: true,
-    });
+    cy.get('#property_enforceCharLimits .cancel.mini.icon')
+      .should('be.visible')
+      .click();
     cy.get('#property_enforceCharLimits').should('not.exist');
   });
 
   it('should open  json modal', () => {
     cy.get('#json_button').click();
-    cy.get('#field-json');
+    cy.get('#field-json').should('be.visible');
   });
 });
