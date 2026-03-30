@@ -2,21 +2,15 @@
 describe('Editing progress', () => {
   before(() => {
     cy.autologin();
+    cy.removeContent('all-of-me', { failOnStatusCode: false });
+    cy.removeField('music', 'name', { failOnStatusCode: false });
+    cy.removeContentType('music', { failOnStatusCode: false });
     cy.addContentType('music');
-    cy.visit('/controlpanel/dexterity-types/music/schema');
-
-    cy.get('#addfield').click();
-    cy.waitForResourceToLoad('Fields');
-    cy.get('.react-select__value-container').click({ force: true });
-    cy.wait(100);
-    cy.get('#react-select-4-option-17').click({ force: true });
-    cy.wait(100);
-    cy.get('#field-title:enabled').type('Name', { force: true });
-    cy.wait(100);
-    cy.get(".actions [aria-label='Save']").click();
-    cy.wait(100);
-    cy.get('#toolbar-save').click();
-    cy.waitForResourceToLoad('music');
+    cy.addField('music', {
+      name: 'name',
+      title: 'Name',
+      factory: 'label_text_field',
+    });
 
     cy.createContent({
       contentType: 'music',
@@ -31,8 +25,9 @@ describe('Editing progress', () => {
   });
   after(() => {
     cy.autologin();
-    cy.removeContent('all-of-me');
-    cy.removeContentType('music');
+    cy.removeContent('all-of-me', { failOnStatusCode: false });
+    cy.removeField('music', 'name', { failOnStatusCode: false });
+    cy.removeContentType('music', { failOnStatusCode: false });
   });
 
   it('should change background color', () => {
@@ -53,13 +48,27 @@ describe('Editing progress', () => {
     cy.wait(100);
     cy.get('.dropdown-button').click({ force: true });
     cy.wait(100);
-    cy.get('span').contains('description').click({ force: true });
-    cy.get('.title-editing-progress').first().click({ force: true });
-    cy.get('label').contains('Message').click({ force: true });
+    cy.get('span').contains('Enforce character limits').click({
+      force: true,
+    });
+    cy.get('#property_enforceCharLimits').should('be.visible').click({
+      force: true,
+    });
+    cy.get('#property_content_enforceCharLimits')
+      .should('be.visible')
+      .within(() => {
+        cy.contains('label', 'Link Label').should('be.visible');
+        cy.get('input[name="charLimitsLinkLabel"]')
+          .clear()
+          .type('Fix {title}', { parseSpecialCharSequences: false });
+      });
 
     cy.get('#sidebar_music').click({ force: true });
     cy.wait(100);
-    cy.get('.cancel.mini.icon').click();
+    cy.get('#property_enforceCharLimits .cancel.mini.icon').click({
+      force: true,
+    });
+    cy.get('#property_enforceCharLimits').should('not.exist');
   });
 
   it('should open  json modal', () => {

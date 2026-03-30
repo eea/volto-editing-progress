@@ -3,6 +3,32 @@ import { slateBeforeEach, slateAfterEach } from '../support/e2e';
 describe('Blocks Tests', () => {
   beforeEach(slateBeforeEach);
   afterEach(slateAfterEach);
+
+  it('Add Block: Empty', () => {
+    // Change page title
+    cy.clearSlateTitle();
+    cy.getSlateTitle().type('My Add-on Page');
+
+    cy.get('.documentFirstHeading').contains('My Add-on Page');
+
+    cy.getSlate().click();
+
+    // Add block
+    cy.get('.ui.basic.icon.button.block-add-button').first().click();
+    cy.get('.blocks-chooser .title').contains('Media').click();
+    cy.get('.content.active.media .button.image').contains('Image').click();
+
+    // Save
+    cy.get('#toolbar-save').click();
+    cy.url().should('eq', Cypress.config().baseUrl + '/cypress/my-page');
+
+    // then the page view should contain our changes
+    cy.contains('My Add-on Page');
+    cy.get('.block.image');
+  });
+});
+
+describe('Editing Progress Workflow', () => {
   const documentStep = `{
   "Document": [
     {
@@ -36,34 +62,59 @@ describe('Blocks Tests', () => {
   ]
 }`;
 
-  it('Add Block: Empty', () => {
-    // Change page title
-    cy.clearSlateTitle();
-    cy.getSlateTitle().type('My Add-on Page');
+  before(() => {
+    cy.autologin();
+    // Clean up any leftover state from previous runs
+    cy.removeField('Document', 'test_progress', { failOnStatusCode: false });
+    cy.removeField('Document', 'test_progress_2', { failOnStatusCode: false });
+    cy.removeContent('cypress', { failOnStatusCode: false });
 
-    cy.get('.documentFirstHeading').contains('My Add-on Page');
+    // Create the fixtures before adding required fields so the setup itself
+    // is not blocked by validation and the edit form still shows them as
+    // missing values.
+    cy.createContent({
+      contentType: 'Document',
+      contentId: 'cypress',
+      contentTitle: 'Cypress',
+    });
+    cy.createContent({
+      contentType: 'Document',
+      contentId: 'test-progress',
+      contentTitle: 'Test Progress',
+      path: 'cypress',
+    });
 
-    cy.getSlate().click();
+    // Add required DX fields to Document type
+    cy.addField('Document', {
+      name: 'test_progress',
+      title: 'test_progress',
+      factory: 'Text line (String)',
+      required: true,
+    });
+    cy.addField('Document', {
+      name: 'test_progress_2',
+      title: 'test_progress_2',
+      factory: 'Text line (String)',
+      required: true,
+    });
+  });
 
-    cy.getSlate().type('Hello World!');
+  after(() => {
+    cy.autologin();
+    cy.removeContent('cypress', { failOnStatusCode: false });
+    cy.removeField('Document', 'test_progress', { failOnStatusCode: false });
+    cy.removeField('Document', 'test_progress_2', { failOnStatusCode: false });
+  });
 
-    // Save
-    cy.get('#toolbar-save').click();
-    cy.url().should('eq', Cypress.config().baseUrl + '/cypress/my-page');
+  it('should configure editing progress and verify progress bar', () => {
+    cy.autologin();
 
-    cy.get('#toolbar-add').click();
-    cy.get('#toolbar-add-document').click();
-    cy.clearSlateTitle();
-    cy.getSlateTitle().type('Test Progress');
-    cy.get('.documentFirstHeading').contains('Test Progress');
-    cy.get('#toolbar-save').click();
-
-    cy.get('#toolbar-personal').click();
-    cy.contains('Site Setup').click();
-
+    // Navigate to Editing Progress control panel
+    cy.visit('/controlpanel');
     cy.contains('Editing Progress').click();
     cy.contains('Edit JSON').click();
 
+    // Set the editing progress JSON config
     cy.get('#field-json').should('be.visible');
     cy.get('#field-json')
       .should('be.visible')
@@ -87,50 +138,8 @@ describe('Blocks Tests', () => {
 
     cy.get('#toolbar-save').click();
 
-    cy.navigate('/cypress/my-page');
-
-    cy.get('#toolbar-personal').click();
-    cy.contains('Site Setup').click();
-
-    cy.contains('Content Types').click();
-    cy.get('.ui.dropdown.actions-Document .ellipsis.horizontal.icon').click();
-
-    cy.get('.ui.active.visible.dropdown.actions-Document .item')
-      .contains('Schema')
-      .click();
-
-    cy.get('#addfield').click();
-
-    cy.get('.ui.form .ui.input #field-title')
-      .eq(1)
-      .click()
-      .type('test_progress');
-    cy.get('#field-factory').click().type('text');
-    cy.get('.react-select__menu ').contains('Text').click({ force: true });
-
-    cy.get('.inline.field.field-wrapper-required input').click({ force: true });
-    cy.get('.actions button[title="Save"]').click();
-
-    cy.get('.tabular.menu .item-add').click();
-    cy.get('.modal .ui.input #field-title').click().type('Test Progress');
-    cy.get('#field-id').click({ force: true }).type('testing');
-    cy.get('.actions button[aria-label="Save"]').click();
-
-    cy.get('.tabular.menu .item').contains('Test Progress').click();
-    cy.get('#addfield').click();
-
-    cy.get('.ui.form .ui.input #field-title').click().type('test_progress_2');
-    cy.get('#field-factory').click().type('text');
-    cy.get('.react-select__menu ').contains('Text').click({ force: true });
-
-    cy.get('.inline.field.field-wrapper-required input').click({
-      force: true,
-    });
-    cy.get('.actions button[title="Save"]').click();
-
-    cy.get('#toolbar-save').click();
-
-    cy.navigate('/cypress/my-page/test-progress');
+    // Navigate to test page and verify editing progress
+    cy.navigate('/cypress/test-progress');
 
     cy.get('#toolbar-cut-blocks').should('be.visible');
     cy.get('#toolbar-cut-blocks').click();
@@ -143,15 +152,19 @@ describe('Blocks Tests', () => {
 
     cy.url().should('include', '#fieldset-default-field-label-test_progress');
 
-    cy.get('.field-wrapper-test_progress div[role="textbox"] p').type('test');
-    cy.get('.field-wrapper-test_progress_2 div[role="textbox"] p').type('test');
+    cy.get('#field-test_progress').should('be.visible').clear().type('test');
+    cy.get('#field-test_progress_2')
+      .should('be.visible')
+      .clear()
+      .type('test');
 
     cy.get('#toolbar-save').click();
     cy.url().should(
       'eq',
-      Cypress.config().baseUrl + '/cypress/my-page/test-progress',
+      Cypress.config().baseUrl + '/cypress/test-progress',
     );
 
+    // Clean up the editing progress config via UI
     cy.get('#toolbar-personal').click();
     cy.contains('Site Setup').click();
 
@@ -169,24 +182,6 @@ describe('Blocks Tests', () => {
 
     cy.get('.actions .ui.basic.circular.primary.right.floated.button').click();
 
-    cy.get('#toolbar-save').click();
-    cy.navigate('/cypress/my-page');
-
-    cy.get('#toolbar-personal').click();
-    cy.contains('Site Setup').click();
-
-    cy.contains('Content Types').click();
-    cy.get('.ui.dropdown.actions-Document .ellipsis.horizontal.icon').click();
-
-    cy.get('.ui.active.visible.dropdown.actions-Document .item')
-      .contains('Schema')
-      .click();
-
-    cy.get(
-      '.field-wrapper-test_progress .toolbar button[aria-label="Delete"]',
-    ).click();
-
-    cy.get('.actions .primary.button').contains('OK').click();
     cy.get('#toolbar-save').click();
   });
 });
