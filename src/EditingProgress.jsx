@@ -7,7 +7,7 @@ import './less/editor.less';
 import { Plug } from '@plone/volto/components/manage/Pluggable';
 import { getBaseUrl, flattenToAppURL } from '@plone/volto/helpers';
 
-const filter_remaining_steps = (values, key) => {
+export const filter_remaining_steps = (values, key) => {
   return values.filter((value) => {
     const is_not_ready = !value.is_ready;
     if (!is_not_ready) {

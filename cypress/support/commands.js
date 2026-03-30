@@ -151,7 +151,7 @@ Cypress.Commands.add('addContentType', (name) => {
 });
 
 // --- Remove DX behavior ----------------------------------------------------------
-Cypress.Commands.add('removeContentType', (name) => {
+Cypress.Commands.add('removeContentType', (name, options = {}) => {
   let api_url, auth;
   api_url = Cypress.env('API_PATH') || 'http://localhost:8080/Plone';
   auth = {
@@ -162,6 +162,7 @@ Cypress.Commands.add('removeContentType', (name) => {
     .request({
       method: 'DELETE',
       url: `${api_url}/@controlpanels/dexterity-types/${name}`,
+      failOnStatusCode: options.failOnStatusCode ?? true,
       headers: {
         Accept: 'application/json',
       },
@@ -173,33 +174,56 @@ Cypress.Commands.add('removeContentType', (name) => {
 
 // --- Add DX field ----------------------------------------------------------
 Cypress.Commands.add('addSlateJSONField', (type, name) => {
-  let api_url, auth;
-  api_url = Cypress.env('API_PATH') || 'http://localhost:8080/Plone';
-  auth = {
-    user: 'admin',
-    pass: 'admin',
-  };
-  return cy
-    .request({
-      method: 'POST',
-      url: `${api_url}/@types/${type}`,
-      headers: {
-        Accept: 'application/json',
-      },
-      auth: auth,
-      body: {
-        id: name,
-        title: name,
-        description: 'Slate JSON Field',
-        factory: 'SlateJSONField',
-        required: false,
-      },
-    })
-    .then(() => console.log(`${name} SlateJSONField field added to ${type}`));
+  return cy.addField(type, {
+    name,
+    title: name,
+    description: 'Slate JSON Field',
+    factory: 'SlateJSONField',
+    required: false,
+  });
 });
 
-// --- Remove DX field ----------------------------------------------------------
-Cypress.Commands.add('removeSlateJSONField', (type, name) => {
+// --- Add DX field ----------------------------------------------------------
+Cypress.Commands.add(
+  'addField',
+  (
+    type,
+    {
+      name,
+      title = name,
+      description = '',
+      factory = 'label_text_field',
+      required = false,
+    },
+  ) => {
+    let api_url, auth;
+    api_url = Cypress.env('API_PATH') || 'http://localhost:8080/Plone';
+    auth = {
+      user: 'admin',
+      pass: 'admin',
+    };
+    return cy
+      .request({
+        method: 'POST',
+        url: `${api_url}/@types/${type}`,
+        headers: {
+          Accept: 'application/json',
+        },
+        auth: auth,
+        body: {
+          id: name,
+          title,
+          description,
+          factory,
+          required,
+        },
+      })
+      .then(() => console.log(`${name} field added to ${type}`));
+  },
+);
+
+// --- Remove DX field -------------------------------------------------------
+Cypress.Commands.add('removeField', (type, name, options = {}) => {
   let api_url, auth;
   api_url = Cypress.env('API_PATH') || 'http://localhost:8080/Plone';
   auth = {
@@ -210,19 +234,23 @@ Cypress.Commands.add('removeSlateJSONField', (type, name) => {
     .request({
       method: 'DELETE',
       url: `${api_url}/@types/${type}/${name}`,
+      failOnStatusCode: options.failOnStatusCode ?? true,
       headers: {
         Accept: 'application/json',
       },
       auth: auth,
       body: {},
     })
-    .then(() =>
-      console.log(`${name} SlateJSONField field removed from ${type}`)
-    );
+    .then(() => console.log(`${name} field removed from ${type}`));
+});
+
+// --- Remove DX field ----------------------------------------------------------
+Cypress.Commands.add('removeSlateJSONField', (type, name) => {
+  return cy.removeField(type, name);
 });
 
 // --- REMOVE CONTENT --------------------------------------------------------
-Cypress.Commands.add('removeContent', (path) => {
+Cypress.Commands.add('removeContent', (path, options = {}) => {
   let api_url, auth;
   api_url = Cypress.env('API_PATH') || 'http://localhost:8080/Plone';
   auth = {
@@ -233,6 +261,7 @@ Cypress.Commands.add('removeContent', (path) => {
     .request({
       method: 'DELETE',
       url: `${api_url}/${path}`,
+      failOnStatusCode: options.failOnStatusCode ?? true,
       headers: {
         Accept: 'application/json',
       },
@@ -387,7 +416,10 @@ Cypress.Commands.add('getSlate', ({ createNewSlate = true } = {}) => {
     },
     () => {
       if (createNewSlate) {
-        cy.get('.block.inner').last().type('{moveToEnd}{enter}');
+        cy.get(SLATE_TITLE_SELECTOR)
+          .focus()
+          .click()
+          .type('{moveToEnd}{enter}');
       }
       slate = cy.get(SLATE_SELECTOR, { timeout: 10000 }).last();
     }

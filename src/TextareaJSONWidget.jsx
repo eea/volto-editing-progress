@@ -8,7 +8,7 @@ import PropTypes from 'prop-types';
 import { TextArea } from 'semantic-ui-react';
 
 import { defineMessages, injectIntl } from 'react-intl';
-import { FormFieldWrapper } from '@plone/volto/components';
+import FormFieldWrapper from '@plone/volto/components/manage/Widgets/FormFieldWrapper';
 
 const messages = defineMessages({
   invalidJSONError: {
@@ -78,19 +78,17 @@ const TextAreaJSONWidget = (props) => {
  * @static
  */
 TextAreaJSONWidget.propTypes = {
-  widgetProps: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    title: PropTypes.string.isRequired,
-    description: PropTypes.string,
-    required: PropTypes.bool,
-    error: PropTypes.arrayOf(PropTypes.string),
-    value: PropTypes.object,
-    onChange: PropTypes.func,
-    onEdit: PropTypes.func,
-    onDelete: PropTypes.func,
-    wrapped: PropTypes.bool,
-    placeholder: PropTypes.string,
-  }),
+  id: PropTypes.string.isRequired,
+  title: PropTypes.string.isRequired,
+  description: PropTypes.string,
+  required: PropTypes.bool,
+  error: PropTypes.arrayOf(PropTypes.string),
+  value: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
+  onChange: PropTypes.func,
+  onEdit: PropTypes.func,
+  onDelete: PropTypes.func,
+  wrapped: PropTypes.bool,
+  placeholder: PropTypes.string,
 };
 
 /**
@@ -99,15 +97,13 @@ TextAreaJSONWidget.propTypes = {
  * @static
  */
 TextAreaJSONWidget.defaultProps = {
-  widgetProps: {
-    description: null,
-    required: false,
-    error: [],
-    value: null,
-    onChange: null,
-    onEdit: null,
-    onDelete: null,
-  },
+  description: null,
+  required: false,
+  error: [],
+  value: null,
+  onChange: null,
+  onEdit: null,
+  onDelete: null,
 };
 
 export default injectIntl(TextAreaJSONWidget);

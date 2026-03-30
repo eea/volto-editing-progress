@@ -29,7 +29,7 @@ const messages = defineMessages({
 export const SIDEBAR_WIDTH = '250px';
 export const COMPONENT_HEIGHT = '750px';
 
-function isValidJson(json) {
+export function isValidJson(json) {
   try {
     JSON.parse(json);
     return true;
@@ -38,7 +38,7 @@ function isValidJson(json) {
   }
 }
 
-function addNewStateToAlreadyExistingField(
+export function addNewStateToAlreadyExistingField(
   currentContentTypeData,
   currentField,
   statesToAdd,
@@ -67,14 +67,14 @@ function addNewStateToAlreadyExistingField(
   }
 }
 
-function doesPrefixExistInCurrentContentTypeData(
+export function doesPrefixExistInCurrentContentTypeData(
   currentContentTypeData,
   currentField,
 ) {
   return currentContentTypeData.every((rule) => rule.prefix !== currentField);
 }
 
-function createFieldRule(currentField, statesToAdd) {
+export function createFieldRule(currentField, statesToAdd) {
   return {
     prefix: currentField,
     states: statesToAdd,
@@ -102,16 +102,34 @@ const VisualJSONWidget = (props) => {
       return [...acc, ...(cur.fields || [])];
     }, []) || [];
   useEffect(() => {
-    if (path && !request?.loading && !request?.loaded && !content)
+    if (
+      path &&
+      !request?.loading &&
+      !request?.loaded &&
+      !request?.error &&
+      !content
+    )
       dispatch(getRawContent(path));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, path, content, request?.loaded, request?.loading]);
+  }, [
+    dispatch,
+    path,
+    content,
+    request?.error,
+    request?.loaded,
+    request?.loading,
+  ]);
 
   useEffect(() => {
-    if (types.loaded && !types.loading && Array.isArray(types.types)) {
+    if (
+      !currentContentType &&
+      types.loaded &&
+      !types.loading &&
+      Array.isArray(types.types)
+    ) {
       setCurrentContentType(types.types[0]);
     }
-  }, [types]);
+  }, [currentContentType, types]);
 
   const handleOnCancel = (e) => {
     setIsJSONEditorOpen(false);
