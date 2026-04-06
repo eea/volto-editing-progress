@@ -5,7 +5,7 @@ import { Button } from 'semantic-ui-react';
 import { getEditingProgress } from './actions';
 import './less/editor.less';
 import { Plug } from '@plone/volto/components/manage/Pluggable';
-import { getBaseUrl, flattenToAppURL } from '@plone/volto/helpers';
+import { getBaseUrl, flattenToAppURL } from '@plone/volto/helpers/Url/Url';
 
 export const filter_remaining_steps = (values, key) => {
   return values.filter((value) => {

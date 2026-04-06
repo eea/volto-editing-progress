@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ModalForm } from '@plone/volto/components';
+import { ModalForm } from '@plone/volto/components/manage/Form';
 import { JSONSchema } from './schema';
 import { Dropdown } from 'semantic-ui-react';
 
@@ -10,7 +10,7 @@ import {
   Divider,
   Sidebar,
 } from 'semantic-ui-react';
-import { flattenToAppURL } from '@plone/volto/helpers';
+import { flattenToAppURL } from '@plone/volto/helpers/Url/Url';
 import _ from 'lodash';
 import { FormattedMessage, defineMessages, injectIntl } from 'react-intl';
 import PropTypes from 'prop-types';
