@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ModalForm } from '@plone/volto/components/manage/Form';
+import ModalForm from '@plone/volto/components/manage/Form/ModalForm';
 import { JSONSchema } from './schema';
 import { Dropdown } from 'semantic-ui-react';
 
@@ -11,7 +11,7 @@ import {
   Sidebar,
 } from 'semantic-ui-react';
 import { flattenToAppURL } from '@plone/volto/helpers/Url/Url';
-import _ from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
 import { FormattedMessage, defineMessages, injectIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import { useSelector, useDispatch } from 'react-redux';
@@ -165,7 +165,7 @@ const VisualJSONWidget = (props) => {
   ) => {
     const states = data.value;
     const statesToAdd = states?.map((state) => state.toLowerCase());
-    const localCopyOfValue = _.cloneDeep(value);
+    const localCopyOfValue = cloneDeep(value);
     const currentContentTypeData = localCopyOfValue[currentContentType.id];
 
     if (!currentContentTypeData && data) {
@@ -221,7 +221,7 @@ const VisualJSONWidget = (props) => {
 
   // Handler to add enforceCharLimits rule
   const handleAddEnforceCharLimits = () => {
-    const localCopyOfValue = _.cloneDeep(value);
+    const localCopyOfValue = cloneDeep(value);
     if (!localCopyOfValue[currentContentType.id]) {
       localCopyOfValue[currentContentType.id] = [];
     }
@@ -243,7 +243,7 @@ const VisualJSONWidget = (props) => {
 
   // Handler to update enforceCharLimits rule
   const handleUpdateEnforceCharLimits = (key, newValue) => {
-    const localCopyOfValue = _.cloneDeep(value);
+    const localCopyOfValue = cloneDeep(value);
     const rules = localCopyOfValue[currentContentType.id] || [];
     const ruleIndex = rules.findIndex((r) => r.type === 'enforceCharLimits');
 
@@ -259,7 +259,7 @@ const VisualJSONWidget = (props) => {
 
   // Handler to remove enforceCharLimits rule
   const handleRemoveEnforceCharLimits = () => {
-    const localCopyOfValue = _.cloneDeep(value);
+    const localCopyOfValue = cloneDeep(value);
     const rules = localCopyOfValue[currentContentType.id] || [];
     localCopyOfValue[currentContentType.id] = rules.filter(
       (r) => r.type !== 'enforceCharLimits',
