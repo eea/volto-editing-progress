@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Segment, Dropdown, Accordion, Icon } from 'semantic-ui-react';
-import { flattenToAppURL } from '@plone/volto/helpers';
+import { flattenToAppURL } from '@plone/volto/helpers/Url/Url';
 import { useSelector, useDispatch } from 'react-redux';
 import { getRawContent } from './actions';
 import { COMPONENT_HEIGHT } from './VisualJSONWidget';
