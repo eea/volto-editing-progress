@@ -6,25 +6,25 @@ import EditingProgress from './EditingProgress';
 import { useDispatch, useSelector } from 'react-redux';
 import { getEditingProgress } from './actions';
 
-jest.mock('react-redux', () => ({
-  useDispatch: jest.fn(),
-  useSelector: jest.fn(),
+vi.mock('react-redux', () => ({
+  useDispatch: vi.fn(),
+  useSelector: vi.fn(),
 }));
 
-jest.mock('@plone/volto/helpers', () => ({
-  getBaseUrl: jest.fn(() => '/news'),
-  flattenToAppURL: jest.fn((url) => url),
+vi.mock('@plone/volto/helpers', () => ({
+  getBaseUrl: vi.fn(() => '/news'),
+  flattenToAppURL: vi.fn((url) => url),
 }));
 
-jest.mock('@plone/volto/components/manage/Pluggable', () => ({
+vi.mock('@plone/volto/components/manage/Pluggable', () => ({
   Plug: ({ children }) => children(),
 }));
 
 describe('EditingProgress component', () => {
-  const dispatch = jest.fn();
+  const dispatch = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useDispatch.mockReturnValue(dispatch);
   });
 
