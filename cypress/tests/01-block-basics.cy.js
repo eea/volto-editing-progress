@@ -134,7 +134,7 @@ describe('Editing Progress Workflow', () => {
 
     cy.get('#field-json').invoke('val', documentStep).type('{enter}');
 
-    cy.get('.actions button[type="submit"]').click();
+    cy.get('.ui.modal .actions button[aria-label="Save"]').click();
 
     cy.get('#toolbar-save').click();
 
@@ -174,7 +174,7 @@ describe('Editing Progress Workflow', () => {
 
     cy.get('#field-json').invoke('val', '{}').click().type('{enter}');
 
-    cy.get('.actions button[type="submit"]').click();
+    cy.get('.ui.modal .actions button[aria-label="Save"]').click();
 
     cy.get('#toolbar-save').click();
   });
