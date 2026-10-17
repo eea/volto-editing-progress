@@ -1,0 +1,7 @@
+{
+  "title": "Editing Progress",
+  "frontend_addon_name": "volto-editing-progress",
+  "description": "@eeacms/volto-editing-progress: Volto add-on",
+  "volto_version": "19.3.0",
+  "__template__": "frontend_addon"
+}
