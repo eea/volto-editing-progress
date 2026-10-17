@@ -134,7 +134,7 @@ describe('Editing Progress Workflow', () => {
 
     cy.get('#field-json').invoke('val', documentStep).type('{enter}');
 
-    cy.get('.actions .ui.basic.circular.primary.right.floated.button').click();
+    cy.get('.actions button[type="submit"]').click();
 
     cy.get('#toolbar-save').click();
 
@@ -153,16 +153,10 @@ describe('Editing Progress Workflow', () => {
     cy.url().should('include', '#fieldset-default-field-label-test_progress');
 
     cy.get('#field-test_progress').should('be.visible').clear().type('test');
-    cy.get('#field-test_progress_2')
-      .should('be.visible')
-      .clear()
-      .type('test');
+    cy.get('#field-test_progress_2').should('be.visible').clear().type('test');
 
     cy.get('#toolbar-save').click();
-    cy.url().should(
-      'eq',
-      Cypress.config().baseUrl + '/cypress/test-progress',
-    );
+    cy.url().should('eq', Cypress.config().baseUrl + '/cypress/test-progress');
 
     // Clean up the editing progress config via UI
     cy.get('#toolbar-personal').click();
@@ -180,7 +174,7 @@ describe('Editing Progress Workflow', () => {
 
     cy.get('#field-json').invoke('val', '{}').click().type('{enter}');
 
-    cy.get('.actions .ui.basic.circular.primary.right.floated.button').click();
+    cy.get('.actions button[type="submit"]').click();
 
     cy.get('#toolbar-save').click();
   });
