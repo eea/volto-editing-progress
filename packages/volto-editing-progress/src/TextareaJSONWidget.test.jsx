@@ -6,7 +6,7 @@ import '@testing-library/jest-dom';
 import TextareaJSONWidget from './TextareaJSONWidget';
 
 const renderWidget = (props = {}) => {
-  const onChange = jest.fn();
+  const onChange = vi.fn();
   render(
     <IntlProvider locale="en" messages={{}}>
       <TextareaJSONWidget
@@ -23,12 +23,12 @@ const renderWidget = (props = {}) => {
 
 describe('TextareaJSONWidget', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.clearAllTimers();
-    jest.useRealTimers();
+    vi.clearAllTimers();
+    vi.useRealTimers();
   });
 
   it('parses string value and renders pretty json', () => {
@@ -56,7 +56,7 @@ describe('TextareaJSONWidget', () => {
     expect(screen.getByText('Please enter valid JSON!')).toBeInTheDocument();
 
     act(() => {
-      jest.advanceTimersByTime(1600);
+      vi.advanceTimersByTime(1600);
     });
     expect(
       screen.queryByText('Please enter valid JSON!'),

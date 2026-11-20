@@ -49,7 +49,7 @@ describe('Widget Sidebar', () => {
         { id: 'event', title: 'Event' },
       ],
     };
-    const handleChange = jest.fn();
+    const handleChange = vi.fn();
 
     render(
       <SidebarComponent
@@ -80,7 +80,7 @@ describe('Widget Sidebar', () => {
       loading: false,
       types: [{ id: 'document', title: 'Document' }],
     };
-    const handleChange = jest.fn();
+    const handleChange = vi.fn();
 
     render(
       <SidebarComponent
@@ -106,7 +106,7 @@ describe('Widget Sidebar', () => {
       <SidebarComponent
         types={types}
         currentContentType={null}
-        handleChangeSelectedContentType={jest.fn()}
+        handleChangeSelectedContentType={vi.fn()}
         value={{}}
       />,
     );
@@ -129,7 +129,7 @@ describe('Widget Sidebar', () => {
       <SidebarComponent
         types={types}
         currentContentType={null}
-        handleChangeSelectedContentType={jest.fn()}
+        handleChangeSelectedContentType={vi.fn()}
         value={{}}
       />,
     );
@@ -169,7 +169,7 @@ describe('Visual widget', () => {
             {...propsEmpty}
             hasToolbar={true}
             value={{}}
-            onChange={jest.fn()}
+            onChange={vi.fn()}
           />
         </MemoryRouter>
       </Provider>,
@@ -219,7 +219,7 @@ describe('Visual widget', () => {
             pathname="/test"
             hasToolbar={true}
             value={{}}
-            onChange={jest.fn()}
+            onChange={vi.fn()}
           />
         </MemoryRouter>
       </Provider>,
@@ -273,7 +273,7 @@ describe('Visual widget', () => {
             pathname="/test"
             hasToolbar={true}
             value={valueWithCharLimits}
-            onChange={jest.fn()}
+            onChange={vi.fn()}
           />
         </MemoryRouter>
       </Provider>,
@@ -283,7 +283,7 @@ describe('Visual widget', () => {
   });
 
   it('adds enforceCharLimits when dropdown option is selected', () => {
-    const mockOnChange = jest.fn();
+    const mockOnChange = vi.fn();
     const store = mockStore({
       intl: {
         locale: 'en',
@@ -359,7 +359,7 @@ describe('Visual widget', () => {
             pathname="/test"
             hasToolbar={true}
             value={{}}
-            onChange={jest.fn()}
+            onChange={vi.fn()}
           />
         </MemoryRouter>
       </Provider>,
@@ -393,7 +393,7 @@ describe('Visual widget', () => {
             pathname="/test"
             hasToolbar={true}
             value={{}}
-            onChange={jest.fn()}
+            onChange={vi.fn()}
           />
         </MemoryRouter>
       </Provider>,
@@ -403,7 +403,7 @@ describe('Visual widget', () => {
   });
 
   it('updates existing field rule when dropdown changes for existing field', () => {
-    const mockOnChange = jest.fn();
+    const mockOnChange = vi.fn();
     const existingValue = {
       'content-type-1': [
         {
@@ -468,7 +468,7 @@ describe('Visual widget', () => {
   });
 
   it('handles field with multiple rules where prefix does not match', () => {
-    const mockOnChange = jest.fn();
+    const mockOnChange = vi.fn();
     const existingValue = {
       'content-type-1': [
         {
@@ -578,16 +578,16 @@ describe('EditDataComponent with enforceCharLimits', () => {
               loading: false,
               data: { fieldsets: [{ fields: [] }], required: [] },
             }}
-            handleOnDropdownChange={jest.fn()}
+            handleOnDropdownChange={vi.fn()}
             currentContentType={{
               id: 'content-type-1',
               title: 'Content Type 1',
             }}
             value={value}
             fields={[]}
-            getDropdownValues={jest.fn()}
-            handleUpdateEnforceCharLimits={jest.fn()}
-            handleRemoveEnforceCharLimits={jest.fn()}
+            getDropdownValues={vi.fn()}
+            handleUpdateEnforceCharLimits={vi.fn()}
+            handleRemoveEnforceCharLimits={vi.fn()}
           />
         </MemoryRouter>
       </Provider>,
@@ -622,16 +622,16 @@ describe('EditDataComponent with enforceCharLimits', () => {
               loading: false,
               data: { fieldsets: [{ fields: [] }], required: [] },
             }}
-            handleOnDropdownChange={jest.fn()}
+            handleOnDropdownChange={vi.fn()}
             currentContentType={{
               id: 'content-type-1',
               title: 'Content Type 1',
             }}
             value={{}}
             fields={[]}
-            getDropdownValues={jest.fn()}
-            handleUpdateEnforceCharLimits={jest.fn()}
-            handleRemoveEnforceCharLimits={jest.fn()}
+            getDropdownValues={vi.fn()}
+            handleUpdateEnforceCharLimits={vi.fn()}
+            handleRemoveEnforceCharLimits={vi.fn()}
           />
         </MemoryRouter>
       </Provider>,
@@ -669,7 +669,7 @@ describe('EditDataComponent with enforceCharLimits', () => {
       ],
     };
 
-    const handleRemove = jest.fn();
+    const handleRemove = vi.fn();
 
     render(
       <Provider store={store}>
@@ -680,15 +680,15 @@ describe('EditDataComponent with enforceCharLimits', () => {
               loading: false,
               data: { fieldsets: [{ fields: [] }], required: [] },
             }}
-            handleOnDropdownChange={jest.fn()}
+            handleOnDropdownChange={vi.fn()}
             currentContentType={{
               id: 'content-type-1',
               title: 'Content Type 1',
             }}
             value={value}
             fields={[]}
-            getDropdownValues={jest.fn()}
-            handleUpdateEnforceCharLimits={jest.fn()}
+            getDropdownValues={vi.fn()}
+            handleUpdateEnforceCharLimits={vi.fn()}
             handleRemoveEnforceCharLimits={handleRemove}
           />
         </MemoryRouter>
@@ -729,7 +729,7 @@ describe('EditDataComponent with enforceCharLimits', () => {
       ],
     };
 
-    const handleUpdate = jest.fn();
+    const handleUpdate = vi.fn();
 
     render(
       <Provider store={store}>
@@ -740,16 +740,16 @@ describe('EditDataComponent with enforceCharLimits', () => {
               loading: false,
               data: { fieldsets: [{ fields: [] }], required: [] },
             }}
-            handleOnDropdownChange={jest.fn()}
+            handleOnDropdownChange={vi.fn()}
             currentContentType={{
               id: 'content-type-1',
               title: 'Content Type 1',
             }}
             value={value}
             fields={[]}
-            getDropdownValues={jest.fn()}
+            getDropdownValues={vi.fn()}
             handleUpdateEnforceCharLimits={handleUpdate}
-            handleRemoveEnforceCharLimits={jest.fn()}
+            handleRemoveEnforceCharLimits={vi.fn()}
           />
         </MemoryRouter>
       </Provider>,
@@ -791,13 +791,13 @@ describe('EditDataComponent with enforceCharLimits', () => {
               loading: false,
               data: { fieldsets: [{ fields: [] }], required: [] },
             }}
-            handleOnDropdownChange={jest.fn()}
+            handleOnDropdownChange={vi.fn()}
             currentContentType={null}
             value={{}}
             fields={[]}
-            getDropdownValues={jest.fn()}
-            handleUpdateEnforceCharLimits={jest.fn()}
-            handleRemoveEnforceCharLimits={jest.fn()}
+            getDropdownValues={vi.fn()}
+            handleUpdateEnforceCharLimits={vi.fn()}
+            handleRemoveEnforceCharLimits={vi.fn()}
           />
         </MemoryRouter>
       </Provider>,
@@ -849,7 +849,7 @@ describe('EditDataComponent with enforceCharLimits', () => {
                 required: ['title'],
               },
             }}
-            handleOnDropdownChange={jest.fn()}
+            handleOnDropdownChange={vi.fn()}
             currentContentType={{
               id: 'content-type-1',
               title: 'Content Type 1',
@@ -859,8 +859,8 @@ describe('EditDataComponent with enforceCharLimits', () => {
             getDropdownValues={(field) =>
               field === 'description' ? ['All'] : undefined
             }
-            handleUpdateEnforceCharLimits={jest.fn()}
-            handleRemoveEnforceCharLimits={jest.fn()}
+            handleUpdateEnforceCharLimits={vi.fn()}
+            handleRemoveEnforceCharLimits={vi.fn()}
           />
         </MemoryRouter>
       </Provider>,
@@ -889,16 +889,16 @@ describe('EditDataComponent with enforceCharLimits', () => {
         <MemoryRouter>
           <EditDataComponent
             request={{ loaded: false, loading: true, data: null }}
-            handleOnDropdownChange={jest.fn()}
+            handleOnDropdownChange={vi.fn()}
             currentContentType={{
               id: 'content-type-1',
               title: 'Content Type 1',
             }}
             value={{}}
             fields={[]}
-            getDropdownValues={jest.fn()}
-            handleUpdateEnforceCharLimits={jest.fn()}
-            handleRemoveEnforceCharLimits={jest.fn()}
+            getDropdownValues={vi.fn()}
+            handleUpdateEnforceCharLimits={vi.fn()}
+            handleRemoveEnforceCharLimits={vi.fn()}
           />
         </MemoryRouter>
       </Provider>,
@@ -910,7 +910,7 @@ describe('EditDataComponent with enforceCharLimits', () => {
   });
 
   it('handles message input change for field', () => {
-    const mockHandleOnDropdownChange = jest.fn();
+    const mockHandleOnDropdownChange = vi.fn();
     const store = mockStore({
       intl: {
         locale: 'en',
@@ -961,8 +961,8 @@ describe('EditDataComponent with enforceCharLimits', () => {
             getDropdownValues={(field) =>
               field === 'description' ? ['All'] : undefined
             }
-            handleUpdateEnforceCharLimits={jest.fn()}
-            handleRemoveEnforceCharLimits={jest.fn()}
+            handleUpdateEnforceCharLimits={vi.fn()}
+            handleRemoveEnforceCharLimits={vi.fn()}
           />
         </MemoryRouter>
       </Provider>,
@@ -979,7 +979,7 @@ describe('EditDataComponent with enforceCharLimits', () => {
   });
 
   it('handles link input change for field', () => {
-    const mockHandleOnDropdownChange = jest.fn();
+    const mockHandleOnDropdownChange = vi.fn();
     const store = mockStore({
       intl: {
         locale: 'en',
@@ -1030,8 +1030,8 @@ describe('EditDataComponent with enforceCharLimits', () => {
             getDropdownValues={(field) =>
               field === 'description' ? ['All'] : undefined
             }
-            handleUpdateEnforceCharLimits={jest.fn()}
-            handleRemoveEnforceCharLimits={jest.fn()}
+            handleUpdateEnforceCharLimits={vi.fn()}
+            handleRemoveEnforceCharLimits={vi.fn()}
           />
         </MemoryRouter>
       </Provider>,
@@ -1048,7 +1048,7 @@ describe('EditDataComponent with enforceCharLimits', () => {
   });
 
   it('handles condition input change for field', () => {
-    const mockHandleOnDropdownChange = jest.fn();
+    const mockHandleOnDropdownChange = vi.fn();
     const store = mockStore({
       intl: {
         locale: 'en',
@@ -1099,8 +1099,8 @@ describe('EditDataComponent with enforceCharLimits', () => {
             getDropdownValues={(field) =>
               field === 'description' ? ['All'] : undefined
             }
-            handleUpdateEnforceCharLimits={jest.fn()}
-            handleRemoveEnforceCharLimits={jest.fn()}
+            handleUpdateEnforceCharLimits={vi.fn()}
+            handleRemoveEnforceCharLimits={vi.fn()}
           />
         </MemoryRouter>
       </Provider>,
@@ -1119,12 +1119,12 @@ describe('EditDataComponent with enforceCharLimits', () => {
 
 describe('ScrollIntoView', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     global.__CLIENT__ = true;
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
     delete global.__CLIENT__;
   });
 
@@ -1145,13 +1145,13 @@ describe('ScrollIntoView', () => {
   it('scrolls to element when hash is present', () => {
     const mockElement = document.createElement('div');
     mockElement.id = 'test-element';
-    mockElement.scrollIntoView = jest.fn();
-    mockElement.classList = { add: jest.fn(), remove: jest.fn() };
-    mockElement.closest = jest.fn().mockReturnValue(null);
+    mockElement.scrollIntoView = vi.fn();
+    mockElement.classList = { add: vi.fn(), remove: vi.fn() };
+    mockElement.closest = vi.fn().mockReturnValue(null);
     document.body.appendChild(mockElement);
 
     const originalGetElementById = document.getElementById;
-    document.getElementById = jest.fn().mockReturnValue(mockElement);
+    document.getElementById = vi.fn().mockReturnValue(mockElement);
 
     render(
       <ScrollIntoView
@@ -1159,7 +1159,7 @@ describe('ScrollIntoView', () => {
       />,
     );
 
-    jest.advanceTimersByTime(250);
+    vi.advanceTimersByTime(250);
 
     expect(document.getElementById).toHaveBeenCalledWith('test-element');
     expect(mockElement.scrollIntoView).toHaveBeenCalledWith({
@@ -1173,15 +1173,15 @@ describe('ScrollIntoView', () => {
 
   it('clears interval after 40 attempts', () => {
     const originalGetElementById = document.getElementById;
-    document.getElementById = jest.fn().mockReturnValue(null);
-    const clearIntervalSpy = jest.spyOn(window, 'clearInterval');
+    document.getElementById = vi.fn().mockReturnValue(null);
+    const clearIntervalSpy = vi.spyOn(window, 'clearInterval');
 
     render(
       <ScrollIntoView location={{ hash: '#nonexistent', pathname: '/test' }} />,
     );
 
     // Run 41 intervals (250ms each)
-    jest.advanceTimersByTime(250 * 41);
+    vi.advanceTimersByTime(250 * 41);
 
     expect(clearIntervalSpy).toHaveBeenCalled();
 
@@ -1192,13 +1192,13 @@ describe('ScrollIntoView', () => {
   it('clicks first tab on edit page with fieldset hash', () => {
     const mockElement = document.createElement('div');
     mockElement.id = 'fieldset-test';
-    mockElement.scrollIntoView = jest.fn();
-    mockElement.classList = { add: jest.fn(), remove: jest.fn() };
-    mockElement.closest = jest.fn().mockReturnValue(null);
+    mockElement.scrollIntoView = vi.fn();
+    mockElement.classList = { add: vi.fn(), remove: vi.fn() };
+    mockElement.closest = vi.fn().mockReturnValue(null);
 
     const mockTab = document.createElement('div');
-    mockTab.click = jest.fn();
-    mockTab.classList = { contains: jest.fn().mockReturnValue(false) };
+    mockTab.click = vi.fn();
+    mockTab.classList = { contains: vi.fn().mockReturnValue(false) };
 
     const mockFormTabs = document.createElement('div');
     mockFormTabs.className = 'formtabs';
@@ -1214,14 +1214,14 @@ describe('ScrollIntoView', () => {
     const originalGetElementById = document.getElementById;
     const originalQuerySelector = document.querySelector;
 
-    document.getElementById = jest.fn().mockReturnValue(mockElement);
-    document.querySelector = jest.fn().mockImplementation((selector) => {
+    document.getElementById = vi.fn().mockReturnValue(mockElement);
+    document.querySelector = vi.fn().mockImplementation((selector) => {
       if (selector === '.sidebar-container .formtabs') {
         return mockFormTabs;
       }
       return null;
     });
-    document.querySelectorAll = jest.fn().mockReturnValue([]);
+    document.querySelectorAll = vi.fn().mockReturnValue([]);
 
     render(
       <ScrollIntoView
@@ -1229,7 +1229,7 @@ describe('ScrollIntoView', () => {
       />,
     );
 
-    jest.advanceTimersByTime(250);
+    vi.advanceTimersByTime(250);
 
     expect(mockTab.click).toHaveBeenCalled();
 
@@ -1356,7 +1356,7 @@ describe('Reducers', () => {
 describe('JSONSchema', () => {
   it('returns schema with json field', () => {
     const mockIntl = {
-      formatMessage: jest.fn().mockReturnValue('JSON code'),
+      formatMessage: vi.fn().mockReturnValue('JSON code'),
     };
     const result = JSONSchema({ intl: mockIntl });
     expect(result.required).toContain('json');
@@ -1380,7 +1380,7 @@ describe('TextareaJSONWidget', () => {
           id="test-json"
           title="Test JSON"
           value={{ key: 'value' }}
-          onChange={jest.fn()}
+          onChange={vi.fn()}
         />
       </Provider>,
     );
@@ -1391,7 +1391,7 @@ describe('TextareaJSONWidget', () => {
   });
 
   it('handles valid JSON input', () => {
-    const mockOnChange = jest.fn();
+    const mockOnChange = vi.fn();
     render(
       <Provider store={store}>
         <TextareaJSONWidget
@@ -1412,8 +1412,8 @@ describe('TextareaJSONWidget', () => {
   });
 
   it('handles invalid JSON input and shows error', () => {
-    jest.useFakeTimers();
-    const mockOnChange = jest.fn();
+    vi.useFakeTimers();
+    const mockOnChange = vi.fn();
     render(
       <Provider store={store}>
         <TextareaJSONWidget
@@ -1440,14 +1440,14 @@ describe('TextareaJSONWidget', () => {
 
     // Error should disappear after 1.5 seconds
     act(() => {
-      jest.advanceTimersByTime(1500);
+      vi.advanceTimersByTime(1500);
     });
 
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('handles empty string input as undefined', () => {
-    const mockOnChange = jest.fn();
+    const mockOnChange = vi.fn();
     render(
       <Provider store={store}>
         <TextareaJSONWidget
@@ -1477,7 +1477,7 @@ describe('TextareaJSONWidget', () => {
           id="test-json"
           title="Test JSON"
           value='{"stringified": "value"}'
-          onChange={jest.fn()}
+          onChange={vi.fn()}
         />
       </Provider>,
     );
@@ -1493,7 +1493,7 @@ describe('TextareaJSONWidget', () => {
           id="test-json"
           title="Test JSON"
           value={{ key: 'value' }}
-          onChange={jest.fn()}
+          onChange={vi.fn()}
           isDisabled={true}
         />
       </Provider>,
