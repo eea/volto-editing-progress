@@ -134,9 +134,14 @@ describe('Editing Progress Workflow', () => {
 
     cy.get('#field-json').invoke('val', documentStep).type('{enter}');
 
-    cy.get('.actions .ui.basic.circular.primary.right.floated.button').click();
+    cy.get('.ui.modal .actions button[aria-label="Save"]').click();
 
+    // Wait for the control panel PATCH before leaving: the content page fetches
+    // @editing.progress from the registry this save writes, so navigating while
+    // the request is in flight can read the previous (empty) configuration.
+    cy.intercept('PATCH', '**/@controlpanels/**').as('saveEditingProgress');
     cy.get('#toolbar-save').click();
+    cy.wait('@saveEditingProgress');
 
     // Navigate to test page and verify editing progress
     cy.navigate('/cypress/test-progress');
@@ -144,25 +149,25 @@ describe('Editing Progress Workflow', () => {
     cy.get('#toolbar-cut-blocks').should('be.visible');
     cy.get('#toolbar-cut-blocks').click();
 
-    cy.get('.progress__title').should('contain', '2 fields missing');
-    cy.get('.progress__title button').click();
-    cy.get('.progress__title').should('contain', 'Add test_progress');
-    cy.get('.progress__title').should('contain', 'Add test_progress_2');
-    cy.get('.progress__title ul li a').contains('Add test_progress').click();
+    // Assert on this add-on's own DOM: the counter is rendered by
+    // EditingProgress inside workflow-progress's active .progress__title via
+    // the active-workflow-progress pluggable, only after the async
+    // @editing.progress fetch resolves.
+    cy.get('.ep-sidenav-btn', { timeout: 10000 })
+      .should('be.visible')
+      .and('contain', '2 fields missing');
+    cy.get('.ep-sidenav-btn').click();
+    cy.get('.sidenav-ol--ep').should('contain', 'Add test_progress');
+    cy.get('.sidenav-ol--ep').should('contain', 'Add test_progress_2');
+    cy.get('.sidenav-ol--ep li a').contains('Add test_progress').click();
 
     cy.url().should('include', '#fieldset-default-field-label-test_progress');
 
     cy.get('#field-test_progress').should('be.visible').clear().type('test');
-    cy.get('#field-test_progress_2')
-      .should('be.visible')
-      .clear()
-      .type('test');
+    cy.get('#field-test_progress_2').should('be.visible').clear().type('test');
 
     cy.get('#toolbar-save').click();
-    cy.url().should(
-      'eq',
-      Cypress.config().baseUrl + '/cypress/test-progress',
-    );
+    cy.url().should('eq', Cypress.config().baseUrl + '/cypress/test-progress');
 
     // Clean up the editing progress config via UI
     cy.get('#toolbar-personal').click();
@@ -180,7 +185,7 @@ describe('Editing Progress Workflow', () => {
 
     cy.get('#field-json').invoke('val', '{}').click().type('{enter}');
 
-    cy.get('.actions .ui.basic.circular.primary.right.floated.button').click();
+    cy.get('.ui.modal .actions button[aria-label="Save"]').click();
 
     cy.get('#toolbar-save').click();
   });
